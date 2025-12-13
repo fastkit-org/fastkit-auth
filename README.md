@@ -31,6 +31,15 @@ FastKit Auth provides a complete, production-ready authentication and authorizat
 - 📱 **Multi-Device** - Support for multiple sessions
 - 🧪 **Fully Tested** - 95%+ test coverage
 
+- 2FA (TOTP + Backup codes)
+- RBAC (Roles + Permissions)
+- Decorators (@require_permission, @require_role)
+- Permission Helpers (user.has_permission(), etc.)
+- Dependency Helpers (CurrentUser, CurrentSuperuser)
+- Seeding Helpers (create_default_roles(), etc.)
+- Response Schemas (UserWithRBACSchema)
+- Audit Logging
+- Rate Limiting + Account Locking
 ---
 
 ## 📦 Installation
