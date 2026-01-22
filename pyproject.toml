@@ -7,7 +7,9 @@ authors = [
     { name = "Codevelo", email = "info@codevelo.io" }
 ]
 requires-python = ">=3.12"
-dependencies = []
+dependencies = [
+    "fastkit-core>=0.3.4",
+]
 
 [project.scripts]
 fastkit-auth = "fastkit_auth:main"
