@@ -1,0 +1,21 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: fastkit_auth_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: fastkit
+      POSTGRES_USER: fastkit
+      POSTGRES_PASSWORD: fastkit
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U fastkit -d fastkit"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres_data:
