@@ -1,4 +1,4 @@
-from fastkit_auth.users.auth import auth_backend, fastapi_users
+from src.fastkit_auth.users.auth import auth_backend, fastapi_users
 from fastapi import APIRouter
 
 router = APIRouter(prefix='auth', tags=['Auth'])

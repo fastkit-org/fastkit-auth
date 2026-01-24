@@ -1,5 +1,5 @@
 import uuid
-from fastapi import Depends, Request
+from fastapi import Depends
 from fastapi_users import BaseUserManager, FastAPIUsers, UUIDIDMixin
 from fastapi_users.authentication import (
     AuthenticationBackend,
@@ -8,7 +8,7 @@ from fastapi_users.authentication import (
 )
 from fastapi_users.db import SQLAlchemyUserDatabase
 from sqlalchemy.orm import Session
-from fastkit_auth.users.models import User
+from src.fastkit_auth.users.models import User
 from fastkit_core.database import get_async_db
 from fastkit_core.config import ConfigManager
 configuration = ConfigManager(modules=['auth'])
