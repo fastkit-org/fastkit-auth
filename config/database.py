@@ -5,7 +5,7 @@ CONNECTIONS = {
         'driver': 'postgresql',
         'host': os.getenv('DB_HOST', 'localhost'),
         'port': int(os.getenv('DB_PORT', 5432)),
-        'database': os.getenv('DB_NAME', 'invoice_crm'),
+        'database': os.getenv('DB_NAME', 'fastkit_auth'),
         'username': os.getenv('DB_USER', 'postgres'),
         'password': os.getenv('DB_PASSWORD', 'secret123'),
         'pool_size': 10,

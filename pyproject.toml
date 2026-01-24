@@ -6,13 +6,12 @@ readme = "README.md"
 authors = [
     { name = "Codevelo", email = "info@codevelo.io" }
 ]
-[tool.uv]
-package = "fastkit_auth"
-src-dir = "src"
+
 requires-python = ">=3.12"
 dependencies = [
     "fastapi-users>=15.0.3",
     "fastkit-core>=0.3.4",
+    "fastapi-users[sqlalchemy]>=15.0.3",
 ]
 
 
@@ -23,4 +22,6 @@ build-backend = "uv_build"
 [dependency-groups]
 dev = [
     "alembic",
+    "asyncpg>=0.31.0",
+    "psycopg2-binary>=2.9.11",
 ]
