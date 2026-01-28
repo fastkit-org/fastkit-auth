@@ -21,7 +21,7 @@ async def registration(user: UserCreate, service: UserService = Depends(get_serv
     try:
         data = await service.create(user.model_dump())
         return success_response(
-            data=data.model_dump(),
+            data=data.model_dump(mode='json'),
             message=_('users.create'),
             status_code=201
         )

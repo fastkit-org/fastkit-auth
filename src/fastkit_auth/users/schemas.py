@@ -1,5 +1,6 @@
 from typing import Optional
-
+from pydantic import ConfigDict
+from uuid import UUID
 from fastapi_users import schemas
 from fastkit_core.validation import PasswordValidatorMixin, BaseSchema
 from pydantic import EmailStr, field_serializer
@@ -15,6 +16,7 @@ class UserUpdate(BaseSchema):
     email: EmailStr
 
 class UserResponse(BaseSchema):
+    id: UUID
     first_name: str
     last_name: str
     email: EmailStr
@@ -23,12 +25,10 @@ class UserResponse(BaseSchema):
     is_superuser: bool
     is_verified: bool
 
-    model_config = {
-        "from_attributes": True
-    }
-
-    @field_serializer('email_verified_at')
-    def serialize_datetime(self, dt: datetime | None, _info):
-        if dt is None:
-            return None
-        return dt.strftime("%m/%d/%Y")
+    model_config = ConfigDict(
+        from_attributes=True,
+        json_encoders={
+            UUID: str,
+            datetime: lambda v: v.isoformat() if v else None
+        }
+    )
