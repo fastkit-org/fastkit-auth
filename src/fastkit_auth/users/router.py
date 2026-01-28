@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends
-from fastkit_core.http import success_response, error_response
+from fastkit_core.http import success_response
 from fastkit_core.database import get_async_db
 from fastkit_core.i18n import _
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -16,20 +16,12 @@ def get_service(session: AsyncSession = Depends(get_async_db)) -> UserService:
 
 @registration_router.post('/registration', name='auth.registration')
 async def registration(user: UserCreate, service: UserService = Depends(get_service)) -> JSONResponse:
+    data = await service.create(user.model_dump())
+    return success_response(
+        data=data.model_dump(),
+        message=_('users.create'),
+        status_code=201
+    )
 
-    try:
-        data = await service.create(user.model_dump())
-        return success_response(
-            data=data.model_dump(),
-            message=_('users.create'),
-            status_code=201
-        )
-    except ValueError as e:
-        errors = UserCreate.format_errors(e)
-        return error_response(
-            message=_('validation.failed'),
-            errors=errors,
-            status_code=422
-        )
 
 
