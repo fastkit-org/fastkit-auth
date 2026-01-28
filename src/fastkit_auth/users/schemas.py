@@ -4,7 +4,7 @@ from pydantic import EmailStr, field_serializer
 from uuid import UUID
 from datetime import datetime
 
-class UserCreate(schemas.BaseUserCreate, PasswordValidatorMixin):
+class UserCreate(BaseSchema, schemas.BaseUserCreate, PasswordValidatorMixin):
     first_name: str
     last_name: str
 
