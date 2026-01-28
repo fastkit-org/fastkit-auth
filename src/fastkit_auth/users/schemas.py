@@ -1,7 +1,8 @@
+from typing import Optional
+
 from fastapi_users import schemas
 from fastkit_core.validation import PasswordValidatorMixin, BaseSchema
 from pydantic import EmailStr, field_serializer
-from uuid import UUID
 from datetime import datetime
 
 class UserCreate(BaseSchema, schemas.BaseUserCreate, PasswordValidatorMixin):
@@ -14,14 +15,17 @@ class UserUpdate(BaseSchema):
     email: EmailStr
 
 class UserResponse(BaseSchema):
-    id: UUID
     first_name: str
     last_name: str
     email: EmailStr
-    email_verified_at: datetime
+    email_verified_at: Optional[datetime] | None
     is_active: bool
     is_superuser: bool
     is_verified: bool
+
+    model_config = {
+        "from_attributes": True
+    }
 
     @field_serializer('email_verified_at')
     def serialize_datetime(self, dt: datetime | None, _info):
