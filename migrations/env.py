@@ -19,6 +19,7 @@ if config.config_file_name is not None:
 def import_all_models():
     MODULES = [
         'fastkit_auth.users.models',
+        'fastkit_auth.tokens.models',
     ]
 
     for module_name in MODULES:

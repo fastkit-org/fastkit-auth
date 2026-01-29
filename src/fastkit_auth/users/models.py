@@ -2,7 +2,6 @@ from sqlalchemy import String, DateTime
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from fastapi_users.db import SQLAlchemyBaseUserTableUUID
 from fastkit_core.database import BaseWithTimestamps
-from fastkit_auth.tokens.models import UserToken
 from typing import Optional
 from datetime import datetime
 
@@ -19,7 +18,7 @@ class User(BaseWithTimestamps, SQLAlchemyBaseUserTableUUID):
         default=None,
     )
 
-    tokens: Mapped[list[UserToken]] = relationship(
+    tokens: Mapped[list["UserToken"]] = relationship(
         "UserToken",
         back_populates="user",
         cascade="all, delete-orphan"
