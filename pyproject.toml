@@ -12,6 +12,7 @@ dependencies = [
     "fastapi-users>=15.0.3",
     "fastkit-core>=0.3.4",
     "fastapi-users[sqlalchemy]>=15.0.3",
+    "mailbridge>=2.0.0",
 ]
 
 
