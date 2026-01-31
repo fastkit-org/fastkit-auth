@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, status
 from fastkit_core.http import success_response, error_response
 from fastkit_core.database import get_async_db
 from fastkit_core.i18n import _
@@ -17,14 +17,26 @@ def get_service(session: AsyncSession = Depends(get_async_db)) -> UserService:
 
 @registration_router.post('/registration', name='auth.registration')
 async def registration(user: UserCreate, service: UserService = Depends(get_service)) -> JSONResponse:
-
     try:
         data = await service.create(user.model_dump())
         return success_response(
             data=data.model_dump(mode='json'),
             message=_('users.create'),
-            status_code=201
+            status_code=status.HTTP_201_CREATED
         )
+    except ValidationError as e:
+        errors = UserCreate.format_errors(e)
+        return error_response(
+            message=_('validation.failed'),
+            errors=errors,
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY
+        )
+
+@registration_router.get('/verify-email/{token}', name='auth.email_verification')
+async def verify_email(token: str, service: UserService = Depends(get_service)) -> JSONResponse:
+    try:
+        await service.email_confirmation(token)
+        return success_response(message=_('users.email_confirmed'))
     except ValidationError as e:
         errors = UserCreate.format_errors(e)
         return error_response(
@@ -32,5 +44,3 @@ async def registration(user: UserCreate, service: UserService = Depends(get_serv
             errors=errors,
             status_code=422
         )
-
-
