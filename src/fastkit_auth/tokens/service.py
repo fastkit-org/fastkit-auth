@@ -8,6 +8,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from fastkit_auth.tokens.models import UserToken
 from fastkit_auth.tokens.schemas import TokenCreate, TokenResponse
 from fastkit_auth.tokens.enums import TokenType
+from fastkit_auth.users.service import UserService
+from fastkit_auth.users.schemas import UserUpdate
 from datetime import datetime, timedelta
 from uuid import UUID
 
@@ -15,6 +17,7 @@ from uuid import UUID
 class TokenService(AsyncBaseCrudService[UserToken, TokenCreate, dict, TokenResponse]):
     def __init__(self, session: AsyncSession):
         repository = AsyncRepository(UserToken, session)
+        self.user_service = UserService(session)
         super().__init__(repository, response_schema=TokenResponse)
 
     async def create_token(
@@ -49,12 +52,15 @@ class TokenService(AsyncBaseCrudService[UserToken, TokenCreate, dict, TokenRespo
             raise_validation_error('token', _('tokens.invalid'))
 
         if not token.is_valid():
-            if token.used_at:
-                raise_validation_error('token', _('tokens.already_used'))
-            else:
                 raise_validation_error('token', _('tokens.expired'))
 
         return token
+
+    async def email_confirmation(self, token_string:str) -> None:
+        token = await self.verify_token(token_string, TokenType.EMAIL_VERIFICATION)
+        await self.user_service.email_confirmation(token.user_id)
+        await self.repository.delete(token.id)
+
 
     async def consume_token(self, token_string: str, token_type: TokenType) -> bool:
         token = await self.verify_token(token_string, token_type)
