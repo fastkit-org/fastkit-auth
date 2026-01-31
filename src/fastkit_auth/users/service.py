@@ -7,6 +7,8 @@ from fastkit_auth.users.models import User
 from fastkit_auth.users.schemas import UserUpdate, UserCreate, UserResponse
 from fastapi_users.password import PasswordHelper
 from pydantic_core import InitErrorDetails
+from uuid import UUID
+from datetime import datetime
 
 class UserService(AsyncBaseCrudService[User, UserCreate, UserUpdate, UserResponse]):
     def __init__(self, session: AsyncSession):
@@ -32,3 +34,9 @@ class UserService(AsyncBaseCrudService[User, UserCreate, UserUpdate, UserRespons
         data['hashed_password'] = password_helper.hash(data['password'])
         del data['password']
         return data
+
+    async def email_confirmation(self, id: UUID) -> None:
+        await self.repository.update(id=id, data={
+            'email_verified_at': datetime.now(),
+            'is_active': True
+        }, commit=True)
