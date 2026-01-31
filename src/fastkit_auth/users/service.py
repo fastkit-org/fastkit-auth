@@ -49,7 +49,7 @@ class UserService(AsyncBaseCrudService[User, UserCreate, UserUpdate, UserRespons
             token_string=token_string,
             token_type=TokenType.EMAIL_VERIFICATION
         )
-        await self.repository.update(id=token.id, data={
+        await self.repository.update(id=token.user_id, data={
             'email_verified_at': datetime.now(),
             'is_active': True
         }, commit=True)
