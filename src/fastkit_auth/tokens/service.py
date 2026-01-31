@@ -29,7 +29,7 @@ class TokenService(AsyncBaseCrudService[UserToken, TokenCreate, dict, TokenRespo
             user_id=user_id,
             token=UserToken.generate_token(),
             type=token_type,
-            expires_at=datetime.utcnow() + timedelta(hours=expires_in_hours)
+            expires_at=datetime.now() + timedelta(hours=expires_in_hours)
         )
         return await self.create(token_data)
 
