@@ -1,3 +1,5 @@
+from typing import Optional
+
 from fastkit_core.services import AsyncBaseCrudService
 from fastkit_core.database import AsyncRepository
 from fastkit_core.i18n import _
@@ -10,13 +12,30 @@ from pydantic_core import InitErrorDetails
 from datetime import datetime
 from fastkit_auth.tokens.enums import TokenType
 from fastkit_auth.tokens.service import TokenService
+from mailbridge import MailBridge
+from fastkit_core.config import config
+from fastapi import Request
+
+mailer = MailBridge(
+    provider=config('app.MAIL_PROVIDER'),
+    host=config('app.MAIL_SERVER'),
+    port=config('app.MAIL_PORT'),
+    username=config('app.MAIL_USERNAME'),
+    password=config('app.MAIL_PASSWORD'),
+    use_tls=config('app.MAIL_SSL_TLS'),
+    from_email=config('app.MAIL_FROM')
+)
 
 class UserService(AsyncBaseCrudService[User, UserCreate, UserUpdate, UserResponse]):
     def __init__(self, session: AsyncSession):
         repository = AsyncRepository(User, session)
         self.token_service = TokenService(session)
         self.session = session
+        self.request = None
         super().__init__(repository, response_schema=UserResponse)
+
+    def set_request(self, request: Request) -> None:
+        self.request = request
 
     async def validate_create(self, data: UserCreate) -> None:
         if await self.exists(email=data['email']):
@@ -39,9 +58,19 @@ class UserService(AsyncBaseCrudService[User, UserCreate, UserUpdate, UserRespons
         return data
 
     async def after_create(self, instance: User) -> None:
-        await self.token_service.create_token(
+        token = await self.token_service.create_token(
             user_id=instance.id,
             token_type=TokenType.EMAIL_VERIFICATION
+        )
+
+        mailer.send(
+            to=instance.email,
+            subject=_('emails.confirm_email.subject'),
+            body=_('emails.confirm_email.body',
+                   None,
+                   name=instance.first_name,
+                   url=self.request.url_for('auth.email_verification', token=token.token)
+                   )
         )
 
     async def email_confirmation(self, token_string: str) -> None:

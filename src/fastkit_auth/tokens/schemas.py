@@ -14,6 +14,7 @@ class TokenResponse(BaseSchema):
     id: int
     user_id: UUID
     type: TokenType
+    token: str
     expires_at: datetime
 
     model_config = ConfigDict(

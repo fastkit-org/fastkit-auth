@@ -1,0 +1,8 @@
+{
+  "emails": {
+    "confirm_email": {
+      "subject": "Welcome",
+      "body": "Welcome {name}, <br> Please click on the link below to confirm your email<br><a href=\"{url}\">{url}</a>"
+    }
+  }
+}

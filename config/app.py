@@ -6,9 +6,10 @@ DEFAULT_LANGUAGE = os.getenv('APP_DEFAULT_LANGUAGE', 'en')
 FALLBACK_LANGUAGE = os.getenv('APP_FALLBACK_LANGUAGE', 'en')
 
 #mail
+MAIL_PROVIDER = os.getenv('MAIL_PROVIDER')
 MAIL_USERNAME = os.getenv('MAIL_USERNAME')
 MAIL_PASSWORD = os.getenv('MAIL_PASSWORD')
 MAIL_FROM = os.getenv('MAIL_FROM')
-MAIL_PORT = os.getenv('MAIL_PORT')
+MAIL_PORT = int(os.getenv('MAIL_PORT'))
 MAIL_SERVER = os.getenv('MAIL_SERVER')
-MAIL_SSL_TLS = os.getenv('MAIL_SSL_TLS')
+MAIL_SSL_TLS = os.getenv('MAIL_SSL_TLS').lower() in ('true', '1', 't')

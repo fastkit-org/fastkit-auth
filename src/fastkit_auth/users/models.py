@@ -17,10 +17,3 @@ class User(BaseWithTimestamps, SQLAlchemyBaseUserTableUUID):
         nullable=True,
         default=None,
     )
-
-    tokens: Mapped[list["UserToken"]] = relationship(
-        "UserToken",
-        back_populates="user",
-        cascade="all, delete-orphan"
-    )
-
