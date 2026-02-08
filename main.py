@@ -1,6 +1,6 @@
 from fastapi import FastAPI, Request
 from fastkit_auth.authentication.router import router as authentication_router
-from fastkit_auth.users.router import registration_router
+from fastkit_auth.users.router import registration_router, profile_router
 from fastkit_core.database import init_async_database
 from fastkit_core.config import ConfigManager
 from fastkit_core.validation import BaseSchema
@@ -30,3 +30,4 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
 
 app.include_router(authentication_router)
 app.include_router(registration_router)
+app.include_router(profile_router)

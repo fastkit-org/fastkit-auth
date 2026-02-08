@@ -6,6 +6,7 @@ from fastapi_users.authentication import (
     BearerTransport,
     JWTStrategy,
 )
+from fastapi.security import OAuth2PasswordBearer
 from fastapi_users.db import SQLAlchemyUserDatabase
 from sqlalchemy.orm import Session
 from src.fastkit_auth.users.models import User
@@ -65,8 +66,16 @@ def get_jwt_strategy() -> JWTStrategy:
         lifetime_seconds=configuration.get('auth.JWT_LIFETIME_SECONDS', 3600)
     )
 
+class CustomAuthBackend(AuthenticationBackend):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Override OAuth2 scheme
+        self.transport.scheme = OAuth2PasswordBearer(
+            tokenUrl="/auth/login"
+        )
 
-auth_backend = AuthenticationBackend(
+
+auth_backend = CustomAuthBackend(
     name="jwt",
     transport=bearer_transport,
     get_strategy=get_jwt_strategy,

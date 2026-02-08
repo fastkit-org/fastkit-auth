@@ -9,15 +9,11 @@ from fastkit_core.http import success_response, error_response
 
 router = APIRouter(prefix='/auth', tags=['Auth'])
 
-@router.post('/login', name='auth.login')
-async def login(login_data: LoginRequest, user_manager: UserManager = Depends(get_user_manager)) -> JSONResponse:
-    """Custom login sa email"""
+@router.post('/login', name='auth.login', response_model=None)
+async def login(login_data: OAuth2PasswordRequestForm = Depends()
+                , user_manager: UserManager = Depends(get_user_manager)) -> JSONResponse:
     user = await user_manager.authenticate(
-        credentials = OAuth2PasswordRequestForm(
-            username=login_data.email.__str__(),
-            password=login_data.password
-        )
-
+        credentials = login_data
     )
 
     if not user:
