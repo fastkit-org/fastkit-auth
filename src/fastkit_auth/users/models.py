@@ -1,11 +1,10 @@
 from sqlalchemy import String, DateTime
-from sqlalchemy.orm import Mapped, mapped_column, relationship
-from fastapi_users.db import SQLAlchemyBaseUserTableUUID
-from fastkit_core.database import BaseWithTimestamps
+from sqlalchemy.orm import Mapped, mapped_column
+from fastkit_core.database import BaseWithTimestamps, UUIDMixin
 from typing import Optional
 from datetime import datetime
 
-class User(BaseWithTimestamps, SQLAlchemyBaseUserTableUUID):
+class User(BaseWithTimestamps, UUIDMixin):
     __tablename__ = "users"
 
     __table_args__ = {'extend_existing': True}
