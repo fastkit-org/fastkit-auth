@@ -1,5 +1,7 @@
 import os
 
+PASSWORD_ENCRYPTION_SCHEMES = os.getenv('PASSWORD_ENCRYPTION_SCHEMES', 'bcrypt').split(',')
+
 RESET_PASSWORD_TOKEN_SECRET = os.getenv(
     'RESET_PASSWORD_TOKEN_SECRET',
     'change-me-in-production-reset'

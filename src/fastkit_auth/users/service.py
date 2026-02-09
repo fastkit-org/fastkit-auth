@@ -1,15 +1,13 @@
-from typing import Optional
-
 from fastkit_core.services import AsyncBaseCrudService
 from fastkit_core.database import AsyncRepository
 from fastkit_core.i18n import _
 from pydantic import ValidationError
 from sqlalchemy.ext.asyncio import AsyncSession
+from fastkit_auth.authentication.helpers import PasswordHelper
 from fastkit_auth.users.models import User
 from fastkit_auth.users.schemas import UserUpdate, UserCreate, UserResponse
-from fastapi_users.password import PasswordHelper
 from pydantic_core import InitErrorDetails
-from datetime import datetime
+from datetime import datetime, timezone
 from fastkit_auth.tokens.enums import TokenType
 from fastkit_auth.tokens.service import TokenService
 from mailbridge import MailBridge
@@ -52,8 +50,7 @@ class UserService(AsyncBaseCrudService[User, UserCreate, UserUpdate, UserRespons
             )
 
     async def before_create(self, data: dict) -> dict:
-        password_helper = PasswordHelper()
-        data['hashed_password'] = password_helper.hash(data['password'])
+        data['hashed_password'] = PasswordHelper.hash(data['password'])
         del data['password']
         return data
 
@@ -79,7 +76,7 @@ class UserService(AsyncBaseCrudService[User, UserCreate, UserUpdate, UserRespons
             token_type=TokenType.EMAIL_VERIFICATION
         )
         await self.repository.update(id=token.user_id, data={
-            'email_verified_at': datetime.now(),
+            'email_verified_at': datetime.now(timezone.utc),
             'is_active': True
         }, commit=True)
         await self.token_service.delete(id=token.id)
