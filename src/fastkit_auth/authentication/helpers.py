@@ -34,3 +34,12 @@ class JwtHelper:
 
         to_encode.update({"exp": expire, "type": "access"})
         return jwt.encode(to_encode, config('auth.JWT_TOKEN_SECRET'), config('auth.JWT_ALGORITHM'))
+
+    @staticmethod
+    def create_refresh_token(data: dict, expires_delta: Optional[timedelta] = None) -> str:
+        to_encode = data.copy()
+        expire = (datetime.now(timezone.utc) +
+                  (expires_delta or timedelta(seconds=config('auth.JWT_REFRESH_LIFETIME_SECONDS'))))
+
+        to_encode.update({"exp": expire, "type": "refresh"})
+        return jwt.encode(to_encode, config('auth.JWT_REFRESH_SECRET_KEY'), config('auth.JWT_ALGORITHM'))
