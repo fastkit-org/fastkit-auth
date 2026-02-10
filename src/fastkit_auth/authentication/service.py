@@ -5,7 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from pydantic import ValidationError
 from pydantic_core import InitErrorDetails
 from fastkit_core.i18n import _
-from typing import Optional, Dict
+from typing import Dict
 
 
 class AuthService:
@@ -13,8 +13,7 @@ class AuthService:
         self.user_service = UserService(session)
 
     async def authenticate(self, email: str, password: str) -> Dict:
-        user = await self.user_service.filter_one(email=email)
-
+        user = await self.user_service.find_row(email=email)
         if user is None:
             raise_validation_error('email', _('auth.invalid_credentials'))
 
@@ -24,7 +23,6 @@ class AuthService:
         if not PasswordHelper.verify(password, user.hashed_password):
             raise_validation_error('password', _('auth.invalid_credentials'))
 
-        # JWT 'sub' mora biti string
         token_data = {"sub": str(user.id)}
         access_token = JwtHelper.create_access_token(token_data)
         refresh_token = JwtHelper.create_refresh_token(token_data)

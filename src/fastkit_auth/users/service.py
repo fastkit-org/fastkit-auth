@@ -13,6 +13,8 @@ from fastkit_auth.tokens.service import TokenService
 from mailbridge import MailBridge
 from fastkit_core.config import config
 from fastapi import Request
+from typing import Sequence, Optional
+from sqlalchemy.orm import Load
 
 mailer = MailBridge(
     provider=config('app.MAIL_PROVIDER'),
@@ -34,6 +36,13 @@ class UserService(AsyncBaseCrudService[User, UserCreate, UserUpdate, UserRespons
 
     def set_request(self, request: Request) -> None:
         self.request = request
+
+    async def find_row(self,
+                       load_relations: Sequence[Load] | None = None,
+                        **filters
+                       ) -> Optional[User]:
+        results = await self.repository.filter(_limit=1, _load_relations=load_relations, **filters)
+        return results[0] if results else None
 
     async def validate_create(self, data: UserCreate) -> None:
         if await self.exists(email=data['email']):

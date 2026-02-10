@@ -1,15 +1,15 @@
 from passlib.context import CryptContext
-from fastkit_core.config import config
 from typing import Optional, Dict
 from datetime import datetime, timedelta, timezone
 import jwt
 from fastkit_core.i18n import _
+from fastkit_core.config import ConfigManager
 
+configuration = ConfigManager(modules=['auth'])
 _pwd_context = CryptContext(
-    schemes=config('auth.PASSWORD_ENCRYPTION_SCHEMES', ['bcrypt']),
+    schemes=configuration.get('auth.PASSWORD_ENCRYPTION_SCHEMES', ['bcrypt']),
     deprecated="auto"
 )
-
 
 class PasswordHelper:
 
@@ -31,13 +31,12 @@ class JwtHelper:
     def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -> str:
         if not data.get("sub"):
             raise ValueError(_('auth.token_payload_must_have_sub'))
-
         to_encode = data.copy()
         expire = (datetime.now(timezone.utc) +
-                  (expires_delta or timedelta(seconds=config('auth.JWT_LIFETIME_SECONDS'))))
+                  (expires_delta or timedelta(seconds=configuration.get('auth.JWT_LIFETIME_SECONDS'))))
 
         to_encode.update({"exp": expire, "type": "access", "iat": datetime.now(timezone.utc)})
-        return jwt.encode(to_encode, config('auth.JWT_TOKEN_SECRET'), algorithms=[config('auth.JWT_ALGORITHM')])
+        return jwt.encode(to_encode, configuration.get('auth.JWT_TOKEN_SECRET'), algorithm=configuration.get('auth.JWT_ALGORITHM'))
 
     @staticmethod
     def create_refresh_token(data: dict, expires_delta: Optional[timedelta] = None) -> str:
@@ -46,16 +45,16 @@ class JwtHelper:
 
         to_encode = data.copy()
         expire = (datetime.now(timezone.utc) +
-                  (expires_delta or timedelta(seconds=config('auth.JWT_REFRESH_LIFETIME_SECONDS'))))
+                  (expires_delta or timedelta(seconds=configuration.get('auth.JWT_REFRESH_LIFETIME_SECONDS'))))
 
         to_encode.update({"exp": expire, "type": "refresh", "iat": datetime.now(timezone.utc)})
-        return jwt.encode(to_encode, config('auth.JWT_REFRESH_SECRET_KEY'), algorithms=[config('auth.JWT_ALGORITHM')])
+        return jwt.encode(to_encode, configuration.get('auth.JWT_REFRESH_SECRET_KEY'), algorithm=configuration.get('auth.JWT_ALGORITHM'))
 
     @staticmethod
     def verify_token(token: str, refresh: bool = False) -> Optional[Dict]:
         try:
-            secret = config('auth.JWT_REFRESH_SECRET_KEY') if refresh else config('auth.JWT_TOKEN_SECRET')
-            return jwt.decode(token, secret, algorithms=[config('auth.JWT_ALGORITHM')])
+            secret = configuration.get('auth.JWT_REFRESH_SECRET_KEY') if refresh else configuration.get('auth.JWT_TOKEN_SECRET')
+            return jwt.decode(token, secret, algorithm=configuration.get('auth.JWT_ALGORITHM'))
         except jwt.ExpiredSignatureError:
             raise ValueError(_('auth.token_expired'))
         except jwt.InvalidTokenError:
