@@ -3,6 +3,7 @@ from fastkit_core.config import config
 from typing import Optional, Dict
 from datetime import datetime, timedelta, timezone
 import jwt
+from fastkit_core.i18n import _
 
 _pwd_context = CryptContext(
     schemes=config('auth.PASSWORD_ENCRYPTION_SCHEMES', ['bcrypt']),
@@ -28,26 +29,37 @@ class JwtHelper:
 
     @staticmethod
     def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -> str:
+        if not data.get("sub"):
+            raise ValueError(_('auth.token_payload_must_have_sub'))
+
         to_encode = data.copy()
         expire = (datetime.now(timezone.utc) +
                   (expires_delta or timedelta(seconds=config('auth.JWT_LIFETIME_SECONDS'))))
 
-        to_encode.update({"exp": expire, "type": "access"})
+        to_encode.update({"exp": expire, "type": "access", "iat": datetime.now(timezone.utc)})
         return jwt.encode(to_encode, config('auth.JWT_TOKEN_SECRET'), algorithm=config('auth.JWT_ALGORITHM'))
 
     @staticmethod
     def create_refresh_token(data: dict, expires_delta: Optional[timedelta] = None) -> str:
+        if not data.get("sub"):
+            raise ValueError(_('auth.token_payload_must_have_sub'))
+
         to_encode = data.copy()
         expire = (datetime.now(timezone.utc) +
                   (expires_delta or timedelta(seconds=config('auth.JWT_REFRESH_LIFETIME_SECONDS'))))
 
-        to_encode.update({"exp": expire, "type": "refresh"})
+        to_encode.update({"exp": expire, "type": "refresh", "iat": datetime.now(timezone.utc)})
         return jwt.encode(to_encode, config('auth.JWT_REFRESH_SECRET_KEY'), algorithm=config('auth.JWT_ALGORITHM'))
 
     @staticmethod
     def verify_token(token: str, refresh: bool = False) -> Optional[Dict]:
-        secret = config('auth.JWT_REFRESH_SECRET_KEY') if refresh else config('auth.JWT_TOKEN_SECRET')
-        return jwt.decode(token, secret, algorithm=config('auth.JWT_ALGORITHM'))
+        try:
+            secret = config('auth.JWT_REFRESH_SECRET_KEY') if refresh else config('auth.JWT_TOKEN_SECRET')
+            return jwt.decode(token, secret, algorithm=config('auth.JWT_ALGORITHM'))
+        except jwt.ExpiredSignatureError:
+            raise ValueError(_('auth.token_expired'))
+        except jwt.InvalidTokenError:
+            raise ValueError(_('auth.token_invalid'))
 
     @classmethod
     def refresh_access_token(cls, token: str) -> Optional[Dict]:
