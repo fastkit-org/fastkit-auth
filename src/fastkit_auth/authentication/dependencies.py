@@ -1,4 +1,3 @@
-from typing import Optional
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -68,5 +67,15 @@ async def get_current_verified_user(
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail=_('auth.email_not_verified')
+        )
+    return current_user
+
+async def get_current_superuser(
+    current_user: User = Depends(get_current_user)
+) -> User:
+    if not current_user.is_superuser:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail=_('auth.not_superuser')
         )
     return current_user
