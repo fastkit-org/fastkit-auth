@@ -48,3 +48,17 @@ class JwtHelper:
     def verify_token(token: str, refresh: bool = False) -> Optional[Dict]:
         secret = config('auth.JWT_REFRESH_SECRET_KEY') if refresh else config('auth.JWT_TOKEN_SECRET')
         return jwt.decode(token, secret, algorithm=config('auth.JWT_ALGORITHM'))
+
+    @classmethod
+    def refresh_access_token(cls, token: str) -> Optional[Dict]:
+        payload = cls.verify_token(token, refresh=True)
+
+        if not payload or payload.get('type') != "refresh":
+            return None
+
+        user_data = {"sub": payload.get("sub"), "role": payload.get("role")}
+        new_access = cls.create_access_token(user_data)
+        return {
+            "access_token": new_access,
+            "token_type": "bearer"
+        }
