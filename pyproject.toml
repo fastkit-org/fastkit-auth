@@ -12,6 +12,7 @@ dependencies = [
     "fastkit-core>=0.3.4",
     "mailbridge>=2.0.0",
     "passlib>=1.7.4",
+    "pydantic[email]>=2.12.5",
     "pyjwt>=2.11.0",
 ]
 
