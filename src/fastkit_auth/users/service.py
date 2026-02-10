@@ -86,6 +86,7 @@ class UserService(AsyncBaseCrudService[User, UserCreate, UserUpdate, UserRespons
         )
         await self.repository.update(id=token.user_id, data={
             'email_verified_at': datetime.now(timezone.utc),
-            'is_active': True
+            'is_active': True,
+            'is_verified': True
         }, commit=True)
         await self.token_service.delete(id=token.id)
