@@ -33,7 +33,7 @@ class JwtHelper:
                   (expires_delta or timedelta(seconds=config('auth.JWT_LIFETIME_SECONDS'))))
 
         to_encode.update({"exp": expire, "type": "access"})
-        return jwt.encode(to_encode, config('auth.JWT_TOKEN_SECRET'), config('auth.JWT_ALGORITHM'))
+        return jwt.encode(to_encode, config('auth.JWT_TOKEN_SECRET'), algorithm=config('auth.JWT_ALGORITHM'))
 
     @staticmethod
     def create_refresh_token(data: dict, expires_delta: Optional[timedelta] = None) -> str:
@@ -42,4 +42,9 @@ class JwtHelper:
                   (expires_delta or timedelta(seconds=config('auth.JWT_REFRESH_LIFETIME_SECONDS'))))
 
         to_encode.update({"exp": expire, "type": "refresh"})
-        return jwt.encode(to_encode, config('auth.JWT_REFRESH_SECRET_KEY'), config('auth.JWT_ALGORITHM'))
+        return jwt.encode(to_encode, config('auth.JWT_REFRESH_SECRET_KEY'), algorithm=config('auth.JWT_ALGORITHM'))
+
+    @staticmethod
+    def verify_token(token: str, refresh: bool = False) -> Optional[Dict]:
+        secret = config('auth.JWT_REFRESH_SECRET_KEY') if refresh else config('auth.JWT_TOKEN_SECRET')
+        return jwt.decode(token, secret, algorithm=config('auth.JWT_ALGORITHM'))
