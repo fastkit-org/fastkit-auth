@@ -1,5 +1,8 @@
 from passlib.context import CryptContext
 from fastkit_core.config import config
+from typing import Optional, Dict
+from datetime import datetime, timedelta, timezone
+import jwt
 
 _pwd_context = CryptContext(
     schemes=config('auth.PASSWORD_ENCRYPTION_SCHEMES', ['bcrypt']),
@@ -20,3 +23,14 @@ class PasswordHelper:
     @staticmethod
     def needs_update(hashed_password: str) -> bool:
         return _pwd_context.needs_update(hashed_password)
+
+class JwtHelper:
+
+    @staticmethod
+    def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -> str:
+        to_encode = data.copy()
+        expire = (datetime.now(timezone.utc) +
+                  (expires_delta or timedelta(seconds=config('auth.JWT_LIFETIME_SECONDS'))))
+
+        to_encode.update({"exp": expire, "type": "access"})
+        return jwt.encode(to_encode, config('auth.JWT_TOKEN_SECRET'), config('auth.JWT_ALGORITHM'))
