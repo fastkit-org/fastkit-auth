@@ -1,14 +1,16 @@
 from typing import Optional
 from pydantic import ConfigDict
 from uuid import UUID
-from fastapi_users import schemas
 from fastkit_core.validation import PasswordValidatorMixin, BaseSchema
 from pydantic import EmailStr, field_serializer
 from datetime import datetime
 
-class UserCreate(BaseSchema, schemas.BaseUserCreate, PasswordValidatorMixin):
+class UserCreate(BaseSchema, PasswordValidatorMixin):
     first_name: str
     last_name: str
+    email: EmailStr
+    password: str
+    is_superuser: bool
 
 class UserUpdate(BaseSchema):
     first_name: str

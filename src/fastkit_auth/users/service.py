@@ -1,20 +1,20 @@
-from typing import Optional
-
 from fastkit_core.services import AsyncBaseCrudService
 from fastkit_core.database import AsyncRepository
 from fastkit_core.i18n import _
 from pydantic import ValidationError
 from sqlalchemy.ext.asyncio import AsyncSession
+from fastkit_auth.authentication.helpers import PasswordHelper
 from fastkit_auth.users.models import User
 from fastkit_auth.users.schemas import UserUpdate, UserCreate, UserResponse
-from fastapi_users.password import PasswordHelper
 from pydantic_core import InitErrorDetails
-from datetime import datetime
+from datetime import datetime, timezone
 from fastkit_auth.tokens.enums import TokenType
 from fastkit_auth.tokens.service import TokenService
 from mailbridge import MailBridge
 from fastkit_core.config import config
 from fastapi import Request
+from typing import Sequence, Optional
+from sqlalchemy.orm import Load
 
 mailer = MailBridge(
     provider=config('app.MAIL_PROVIDER'),
@@ -37,6 +37,13 @@ class UserService(AsyncBaseCrudService[User, UserCreate, UserUpdate, UserRespons
     def set_request(self, request: Request) -> None:
         self.request = request
 
+    async def find_row(self,
+                       load_relations: Sequence[Load] | None = None,
+                        **filters
+                       ) -> Optional[User]:
+        results = await self.repository.filter(_limit=1, _load_relations=load_relations, **filters)
+        return results[0] if results else None
+
     async def validate_create(self, data: UserCreate) -> None:
         if await self.exists(email=data['email']):
             raise ValidationError.from_exception_data(
@@ -52,8 +59,7 @@ class UserService(AsyncBaseCrudService[User, UserCreate, UserUpdate, UserRespons
             )
 
     async def before_create(self, data: dict) -> dict:
-        password_helper = PasswordHelper()
-        data['hashed_password'] = password_helper.hash(data['password'])
+        data['hashed_password'] = PasswordHelper.hash(data['password'])
         del data['password']
         return data
 
@@ -79,7 +85,8 @@ class UserService(AsyncBaseCrudService[User, UserCreate, UserUpdate, UserRespons
             token_type=TokenType.EMAIL_VERIFICATION
         )
         await self.repository.update(id=token.user_id, data={
-            'email_verified_at': datetime.now(),
-            'is_active': True
+            'email_verified_at': datetime.now(timezone.utc),
+            'is_active': True,
+            'is_verified': True
         }, commit=True)
         await self.token_service.delete(id=token.id)

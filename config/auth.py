@@ -1,5 +1,7 @@
 import os
 
+PASSWORD_ENCRYPTION_SCHEMES = os.getenv('PASSWORD_ENCRYPTION_SCHEMES', 'bcrypt').split(',')
+
 RESET_PASSWORD_TOKEN_SECRET = os.getenv(
     'RESET_PASSWORD_TOKEN_SECRET',
     'change-me-in-production-reset'
@@ -27,3 +29,8 @@ JWT_REFRESH_LIFETIME_SECONDS = int(os.getenv(
     'JWT_REFRESH_LIFETIME_SECONDS',
     '2592000'  # 30 days default
 ))
+
+JWT_REFRESH_SECRET_KEY = os.getenv("JWT_REFRESH_SECRET_KEY",
+                                   "change-me-in-production-jwt")
+
+JWT_ALGORITHM = os.getenv("JWT_ALGORITHM", "HS256")
