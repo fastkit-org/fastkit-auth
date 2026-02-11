@@ -12,7 +12,6 @@ from fastkit_auth.tokens.enums import TokenType
 from fastkit_auth.tokens.service import TokenService
 from mailbridge import MailBridge
 from fastkit_core.config import config
-from fastapi import Request
 from typing import Sequence, Optional
 from sqlalchemy.orm import Load
 
@@ -31,11 +30,7 @@ class UserService(AsyncBaseCrudService[User, UserCreate, UserUpdate, UserRespons
         repository = AsyncRepository(User, session)
         self.token_service = TokenService(session)
         self.session = session
-        self.request = None
         super().__init__(repository, response_schema=UserResponse)
-
-    def set_request(self, request: Request) -> None:
-        self.request = request
 
     async def find_row(self,
                        load_relations: Sequence[Load] | None = None,
@@ -66,7 +61,8 @@ class UserService(AsyncBaseCrudService[User, UserCreate, UserUpdate, UserRespons
     async def after_create(self, instance: User) -> None:
         token = await self.token_service.create_token(
             user_id=instance.id,
-            token_type=TokenType.EMAIL_VERIFICATION
+            token_type=TokenType.EMAIL_VERIFICATION,
+            expires_in_minutes=10
         )
 
         mailer.send(
@@ -75,7 +71,8 @@ class UserService(AsyncBaseCrudService[User, UserCreate, UserUpdate, UserRespons
             body=_('emails.confirm_email.body',
                    None,
                    name=instance.first_name,
-                   url=self.request.url_for('auth.email_verification', token=token.token)
+                   code=token.token,
+                   minutes=10
                    )
         )
 

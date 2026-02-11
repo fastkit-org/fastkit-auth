@@ -21,7 +21,7 @@ class TokenService(AsyncBaseCrudService[UserToken, TokenCreate, dict, TokenRespo
             self,
             user_id: UUID,
             token_type: TokenType,
-            expires_in_hours: int = 24
+            expires_in_minutes: int = 10
     ) -> UserToken:
         await self.invalidate_user_tokens(user_id, token_type)
 
@@ -29,7 +29,7 @@ class TokenService(AsyncBaseCrudService[UserToken, TokenCreate, dict, TokenRespo
             user_id=user_id,
             token=UserToken.generate_token(),
             type=token_type,
-            expires_at=datetime.now() + timedelta(hours=expires_in_hours)
+            expires_at=datetime.now() + timedelta(minutes=expires_in_minutes)
         )
         return await self.create(token_data)
 

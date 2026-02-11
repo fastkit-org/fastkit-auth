@@ -1,5 +1,3 @@
-from fastapi import Request
-
 from fastapi import APIRouter, Depends, status
 from fastkit_core.http import success_response, error_response
 from fastkit_core.database import get_async_db
@@ -24,9 +22,8 @@ def get_service(session: AsyncSession = Depends(get_async_db)) -> UserService:
     return UserService(session)
 
 @registration_router.post('/registration', name='auth.registration')
-async def registration(request: Request, user: UserCreate, service: UserService = Depends(get_service)) -> JSONResponse:
+async def registration(user: UserCreate, service: UserService = Depends(get_service)) -> JSONResponse:
     try:
-        service.set_request(request)
         data = await service.create(user.model_dump())
         return success_response(
             data=data.model_dump(mode='json'),
