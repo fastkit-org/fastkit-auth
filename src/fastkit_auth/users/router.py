@@ -38,7 +38,7 @@ async def registration(user: UserCreate, service: UserService = Depends(get_serv
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY
         )
 
-@registration_router.get('/verify-email/{token}', name='auth.email_verification')
+@registration_router.put('/verify-email', name='auth.email_verification')
 async def verify_email(token: str, service: UserService = Depends(get_service)) -> JSONResponse:
     try:
         await service.email_confirmation(token)
