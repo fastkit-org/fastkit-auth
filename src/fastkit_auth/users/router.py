@@ -9,6 +9,8 @@ from fastkit_auth.users.schemas import UserCreate
 from fastkit_auth.users.service import UserService
 from starlette.responses import JSONResponse
 from pydantic import ValidationError
+from fastkit_auth.authentication.dependencies import get_current_user
+from fastkit_auth.users.models import User
 
 registration_router = APIRouter(
     tags=['Registration']
@@ -53,5 +55,5 @@ async def verify_email(token: str, service: UserService = Depends(get_service)) 
         )
 
 @profile_router.get('/profile', name='auth.profile')
-async def profile() -> JSONResponse:
-    return success_response(data={})
+async def profile(current_user: User = Depends(get_current_user)) -> JSONResponse:
+    return success_response(data=current_user.model_dump(mode='json'))

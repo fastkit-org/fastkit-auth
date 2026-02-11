@@ -18,7 +18,6 @@ async def get_current_user(
     try:
         payload = JwtHelper.verify_token(token, refresh=False)
         user_id: str = payload.get("sub")
-
         if user_id is None:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,

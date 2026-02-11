@@ -54,7 +54,7 @@ class JwtHelper:
     def verify_token(token: str, refresh: bool = False) -> Optional[Dict]:
         try:
             secret = configuration.get('auth.JWT_REFRESH_SECRET_KEY') if refresh else configuration.get('auth.JWT_TOKEN_SECRET')
-            return jwt.decode(token, secret, algorithm=configuration.get('auth.JWT_ALGORITHM'))
+            return jwt.decode(token, secret, algorithms=[configuration.get('auth.JWT_ALGORITHM')])
         except jwt.ExpiredSignatureError:
             raise ValueError(_('auth.token_expired'))
         except jwt.InvalidTokenError:
