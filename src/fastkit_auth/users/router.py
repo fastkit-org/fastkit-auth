@@ -5,7 +5,7 @@ from fastkit_core.http import success_response, error_response
 from fastkit_core.database import get_async_db
 from fastkit_core.i18n import _
 from sqlalchemy.ext.asyncio import AsyncSession
-from fastkit_auth.users.schemas import UserCreate
+from fastkit_auth.users.schemas import UserCreate, UserUpdate
 from fastkit_auth.users.service import UserService
 from starlette.responses import JSONResponse
 from pydantic import ValidationError
@@ -57,3 +57,15 @@ async def verify_email(token: str, service: UserService = Depends(get_service)) 
 @profile_router.get('/profile', name='auth.profile')
 async def profile(current_user: User = Depends(get_current_user)) -> JSONResponse:
     return success_response(data=current_user.model_dump(mode='json'))
+
+@profile_router.put('/profile', name='auth.profile.update')
+async def update(data:UserUpdate,
+                 current_user: User = Depends(get_current_user),
+                 service: UserService = Depends(get_service)
+                 ) -> JSONResponse:
+    user = await service.update(current_user.id, data.model_dump())
+    return success_response(
+        data=user.model_dump(mode='json'),
+        message=_('users.update'),
+        status_code=status.HTTP_200_OK
+    )

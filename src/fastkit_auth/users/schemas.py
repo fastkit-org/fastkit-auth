@@ -2,7 +2,7 @@ from typing import Optional
 from pydantic import ConfigDict
 from uuid import UUID
 from fastkit_core.validation import PasswordValidatorMixin, BaseSchema
-from pydantic import EmailStr, field_serializer
+from pydantic import EmailStr
 from datetime import datetime
 
 class UserCreate(BaseSchema, PasswordValidatorMixin):
@@ -16,6 +16,7 @@ class UserUpdate(BaseSchema):
     first_name: str
     last_name: str
     email: EmailStr
+    is_superuser: bool
 
 class UserResponse(BaseSchema):
     id: UUID
