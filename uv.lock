@@ -226,7 +226,7 @@ dev = [
 
 [package.metadata]
 requires-dist = [
-    { name = "fastkit-core", specifier = ">=0.3.4" },
+    { name = "fastkit-core", specifier = ">=0.3.5" },
     { name = "mailbridge", specifier = ">=2.0.0" },
     { name = "passlib", specifier = ">=1.7.4" },
     { name = "pydantic", extras = ["email"], specifier = ">=2.12.5" },
@@ -242,7 +242,7 @@ dev = [
 
 [[package]]
 name = "fastkit-core"
-version = "0.3.4"
+version = "0.3.5"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "fastapi" },
@@ -252,9 +252,9 @@ dependencies = [
     { name = "sqlalchemy" },
     { name = "uvicorn", extra = ["standard"] },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/56/ae/4d5d30a2e86e14c54aac9a5277e47a839feb9be066ed006b73ed274b2eb1/fastkit_core-0.3.4.tar.gz", hash = "sha256:74964757df6ff29756d7856fa47c56d55fae97510c38b6d146836018841c6b54", size = 122864, upload-time = "2026-01-19T06:56:28.185Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/86/7d/e6a4442591212c5f01bc1d620c9607416840e8ea508bb2a396e47146c967/fastkit_core-0.3.5.tar.gz", hash = "sha256:d5f9105613cb8399b96dc0829b3f5ac626cf3ce98eb7d46b27c34d6c72bd9de0", size = 124457, upload-time = "2026-02-12T18:06:49.841Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/80/1f/95b9d88ace37dc4928dde91fac25175edaf2e582714c5ae1a5cc56e73310/fastkit_core-0.3.4-py3-none-any.whl", hash = "sha256:2194f4091bc5a54f7ce191b701dba7caac52b709a227738e5c841972f36c8dc6", size = 58287, upload-time = "2026-01-19T06:56:25.827Z" },
+    { url = "https://files.pythonhosted.org/packages/aa/64/89197e303bfd6d3c7e5bad6fc3fa973c38a0491e61d1fc658d0af8e14815/fastkit_core-0.3.5-py3-none-any.whl", hash = "sha256:3b36d06b2e25bef2f31033571fecc9e07cf763c636c63f451ecfc7126b69f6ab", size = 58877, upload-time = "2026-02-12T18:06:47.578Z" },
 ]
 
 [[package]]
