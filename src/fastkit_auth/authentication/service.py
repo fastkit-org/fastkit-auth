@@ -1,12 +1,9 @@
-from typing import Any
 from fastkit_auth.users.service import UserService
 from fastkit_auth.authentication.helpers import PasswordHelper, JwtHelper
 from sqlalchemy.ext.asyncio import AsyncSession
-from pydantic import ValidationError
-from pydantic_core import InitErrorDetails
 from fastkit_core.i18n import _
 from typing import Dict
-
+from fastkit_core.validation.errors import raise_validation_error
 
 class AuthService:
     def __init__(self, session: AsyncSession):
@@ -39,17 +36,3 @@ class AuthService:
                 "is_verified": user.is_verified
             }
         }
-
-
-def raise_validation_error(field: str, message: str, value: Any = None) -> None:
-    raise ValidationError.from_exception_data(
-        'ValidationError',
-        [
-            InitErrorDetails(
-                type='value_error',
-                loc=(field,),
-                input=value,
-                ctx={'error': ValueError(message)}
-            )
-        ]
-    )
