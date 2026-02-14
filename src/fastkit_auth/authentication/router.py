@@ -1,4 +1,4 @@
-from fastkit_auth.authentication.schemas import LoginRequest, RessetPasswordRequest
+from fastkit_auth.authentication.schemas import LoginRequest, RessetPasswordRequest, UpdatePassword
 from fastapi import APIRouter, Depends
 from starlette.responses import JSONResponse
 from fastkit_core.i18n import _
@@ -32,6 +32,19 @@ async def reset_password(data: RessetPasswordRequest, service: AuthService = Dep
     try:
         await service.reset_password(email=data.email.__str__())
         return success_response(message=_('auth.email_sent'))
+    except ValidationError as e:
+        errors = LoginRequest.format_errors(e)
+        return error_response(
+            message=_('validation.failed'),
+            errors=errors,
+            status_code=422
+        )
+
+@router.post('/update-password', name='auth.update_password')
+async def update_password(data: UpdatePassword, service: AuthService = Depends(get_service)) -> JSONResponse:
+    try:
+        await service.update_password(token=data.code.__str__(), password=data.password.__str__())
+        return success_response(message=_('auth.password_updated'))
     except ValidationError as e:
         errors = LoginRequest.format_errors(e)
         return error_response(

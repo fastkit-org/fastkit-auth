@@ -47,6 +47,7 @@ class TokenService(AsyncBaseCrudService[UserToken, TokenCreate, dict, TokenRespo
             raise_validation_error('token', _('tokens.invalid'))
 
         if not token.is_valid():
+                await self.repository.delete(token.id)
                 raise_validation_error('token', _('tokens.expired'))
 
         return token
