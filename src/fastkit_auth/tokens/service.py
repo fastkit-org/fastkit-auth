@@ -1,6 +1,3 @@
-from typing import Any
-from pydantic import ValidationError
-from pydantic_core import InitErrorDetails
 from fastkit_core.services import AsyncBaseCrudService
 from fastkit_core.database import AsyncRepository
 from fastkit_core.i18n import _
@@ -10,6 +7,7 @@ from fastkit_auth.tokens.schemas import TokenCreate, TokenResponse
 from fastkit_auth.tokens.enums import TokenType
 from datetime import datetime, timedelta
 from uuid import UUID
+from fastkit_core.validation.errors import raise_validation_error
 
 
 class TokenService(AsyncBaseCrudService[UserToken, TokenCreate, dict, TokenResponse]):
@@ -58,16 +56,3 @@ class TokenService(AsyncBaseCrudService[UserToken, TokenCreate, dict, TokenRespo
         await self.repository.delete(token.id)
 
         return  token is not None
-
-def raise_validation_error(field: str, message: str, value: Any = None) -> None:
-    raise ValidationError.from_exception_data(
-        'ValidationError',
-        [
-            InitErrorDetails(
-                type='value_error',
-                loc=(field,),
-                input=value,
-                ctx={'error': ValueError(message)}
-            )
-        ]
-    )
