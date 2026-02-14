@@ -105,3 +105,15 @@ class UserService(AsyncBaseCrudService[User, UserCreate, UserUpdate, UserRespons
                    minutes=10
                    )
         )
+
+    async def update_password(self, token_string: str, password: str) -> None:
+        token = await self.token_service.verify_token(
+            token_string=token_string,
+            token_type=TokenType.PASSWORD_RESET
+        )
+
+        await self.repository.update(token.user_id, data={
+            'hashed_password': PasswordHelper.hash(password)
+        }, commit=True)
+
+        await self.token_service.delete(id=token.id)

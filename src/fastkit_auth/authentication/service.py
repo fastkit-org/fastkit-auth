@@ -43,3 +43,6 @@ class AuthService:
             raise_validation_error('email', _('auth.user_does_not_exists'))
 
         await self.user_service.reset_password(user)
+
+    async def update_password(self, token: str, password: str) -> None:
+        await  self.user_service.update_password(token, password)
