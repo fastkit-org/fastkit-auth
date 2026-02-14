@@ -1,5 +1,9 @@
 from fastkit_core.validation import BaseSchema
+from pydantic import  EmailStr
 
 class LoginRequest(BaseSchema):
-    email: str
+    email: EmailStr
     password: str
+
+class RessetPasswordRequest(BaseSchema):
+    email: EmailStr
