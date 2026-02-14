@@ -87,3 +87,21 @@ class UserService(AsyncBaseCrudService[User, UserCreate, UserUpdate, UserRespons
             'is_verified': True
         }, commit=True)
         await self.token_service.delete(id=token.id)
+
+    async def reset_password(self, user: User) -> None:
+        token = await self.token_service.create_token(
+            user_id=user.id,
+            token_type=TokenType.PASSWORD_RESET,
+            expires_in_minutes=10
+        )
+
+        mailer.send(
+            to=user.email,
+            subject=_('emails.resset_password.subject'),
+            body=_('emails.resset_password.body',
+                   None,
+                   name=user.first_name,
+                   code=token.token,
+                   minutes=10
+                   )
+        )
