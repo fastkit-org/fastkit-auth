@@ -36,3 +36,10 @@ class AuthService:
                 "is_verified": user.is_verified
             }
         }
+
+    async def reset_password(self, email: str):
+        user = await self.user_service.find_row(email=email)
+        if user is None:
+            raise_validation_error('email', _('auth.user_does_not_exists'))
+
+        await self.user_service.reset_password(user)
