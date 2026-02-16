@@ -6,7 +6,7 @@ class LoginRequest(BaseSchema):
     email: EmailStr
     password: str
 
-class RessetPasswordRequest(BaseSchema):
+class ResetPasswordRequest(BaseSchema):
     email: EmailStr
 
 class UpdatePassword(BaseSchema, PasswordValidatorMixin):

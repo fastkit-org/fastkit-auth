@@ -1,4 +1,4 @@
-from fastkit_auth.authentication.schemas import LoginRequest, RessetPasswordRequest, UpdatePassword
+from fastkit_auth.authentication.schemas import LoginRequest, ResetPasswordRequest, UpdatePassword
 from fastapi import APIRouter, Depends
 from starlette.responses import JSONResponse
 from fastkit_core.i18n import _
@@ -28,7 +28,7 @@ async def login(data: LoginRequest, service: AuthService = Depends(get_service))
         )
 
 @router.post('/reset-password', name='auth.reset_password')
-async def reset_password(data: RessetPasswordRequest, service: AuthService = Depends(get_service)) -> JSONResponse:
+async def reset_password(data: ResetPasswordRequest, service: AuthService = Depends(get_service)) -> JSONResponse:
     try:
         await service.reset_password(email=data.email.__str__())
         return success_response(message=_('auth.email_sent'))
