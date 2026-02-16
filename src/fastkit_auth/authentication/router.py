@@ -4,6 +4,7 @@ from starlette.responses import JSONResponse
 from fastkit_core.i18n import _
 from fastkit_core.http import success_response, error_response
 from fastkit_auth.authentication.service import AuthService
+from fastkit_core.validation.errors import format_validation_errors
 from fastkit_core.database import get_async_db
 from sqlalchemy.ext.asyncio import AsyncSession
 from pydantic import ValidationError
@@ -20,7 +21,7 @@ async def login(data: LoginRequest, service: AuthService = Depends(get_service))
         response = await service.authenticate(email=data.email, password=data.password)
         return success_response(data=response)
     except ValidationError as e:
-        errors = LoginRequest.format_errors(e)
+        errors = format_validation_errors(e)
         return error_response(
             message=_('validation.failed'),
             errors=errors,
@@ -33,7 +34,7 @@ async def reset_password(data: ResetPasswordRequest, service: AuthService = Depe
         await service.reset_password(email=data.email.__str__())
         return success_response(message=_('auth.email_sent'))
     except ValidationError as e:
-        errors = LoginRequest.format_errors(e)
+        errors = format_validation_errors(e)
         return error_response(
             message=_('validation.failed'),
             errors=errors,
@@ -46,7 +47,7 @@ async def update_password(data: UpdatePassword, service: AuthService = Depends(g
         await service.update_password(token=data.code.__str__(), password=data.password.__str__())
         return success_response(message=_('auth.password_updated'))
     except ValidationError as e:
-        errors = LoginRequest.format_errors(e)
+        errors = format_validation_errors(e)
         return error_response(
             message=_('validation.failed'),
             errors=errors,
