@@ -28,27 +28,34 @@ class PasswordHelper:
 class JwtHelper:
 
     @staticmethod
-    def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -> str:
+    def _create_token(data: dict, secret: str, lifetime_seconds: int, token_type: str,
+                      expires_delta: Optional[timedelta] = None) -> str:
         if not data.get("sub"):
             raise ValueError(_('auth.token_payload_must_have_sub'))
         to_encode = data.copy()
-        expire = (datetime.now(timezone.utc) +
-                  (expires_delta or timedelta(seconds=configuration.get('auth.JWT_LIFETIME_SECONDS'))))
+        expire = datetime.now(timezone.utc) + (expires_delta or timedelta(seconds=lifetime_seconds))
+        to_encode.update({"exp": expire, "type": token_type, "iat": datetime.now(timezone.utc)})
+        return jwt.encode(to_encode, secret, algorithm=configuration.get('auth.JWT_ALGORITHM'))
 
-        to_encode.update({"exp": expire, "type": "access", "iat": datetime.now(timezone.utc)})
-        return jwt.encode(to_encode, configuration.get('auth.JWT_TOKEN_SECRET'), algorithm=configuration.get('auth.JWT_ALGORITHM'))
+    @staticmethod
+    def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -> str:
+        return JwtHelper._create_token(
+            data,
+            secret=configuration.get('auth.JWT_TOKEN_SECRET'),
+            lifetime_seconds=configuration.get('auth.JWT_LIFETIME_SECONDS'),
+            token_type="access",
+            expires_delta=expires_delta
+        )
 
     @staticmethod
     def create_refresh_token(data: dict, expires_delta: Optional[timedelta] = None) -> str:
-        if not data.get("sub"):
-            raise ValueError(_('auth.token_payload_must_have_sub'))
-
-        to_encode = data.copy()
-        expire = (datetime.now(timezone.utc) +
-                  (expires_delta or timedelta(seconds=configuration.get('auth.JWT_REFRESH_LIFETIME_SECONDS'))))
-
-        to_encode.update({"exp": expire, "type": "refresh", "iat": datetime.now(timezone.utc)})
-        return jwt.encode(to_encode, configuration.get('auth.JWT_REFRESH_SECRET_KEY'), algorithm=configuration.get('auth.JWT_ALGORITHM'))
+        return JwtHelper._create_token(
+            data,
+            secret=configuration.get('auth.JWT_REFRESH_SECRET_KEY'),
+            lifetime_seconds=configuration.get('auth.JWT_REFRESH_LIFETIME_SECONDS'),
+            token_type="refresh",
+            expires_delta=expires_delta
+        )
 
     @staticmethod
     def verify_token(token: str, refresh: bool = False) -> Optional[Dict]:
