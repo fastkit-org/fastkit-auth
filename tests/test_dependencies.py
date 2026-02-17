@@ -107,3 +107,22 @@ class TestGetCurrentUser:
             await get_current_user(mock_credentials, mock_session)
 
         MockJWT.verify_token.assert_called_once_with("valid-bearer-token", refresh=False)
+
+# ─── get_current_verified_user ────────────────────────────────────────────────
+
+class TestGetCurrentVerifiedUser:
+
+    @pytest.mark.asyncio
+    async def test_returns_verified_user(self, mock_user_response):
+        mock_user_response.is_verified = True
+        result = await get_current_verified_user(mock_user_response)
+        assert result == mock_user_response
+
+    @pytest.mark.asyncio
+    async def test_raises_403_on_unverified_user(self, mock_user_response):
+        mock_user_response.is_verified = False
+
+        with pytest.raises(HTTPException) as exc_info:
+            await get_current_verified_user(mock_user_response)
+
+        assert exc_info.value.status_code == 403
