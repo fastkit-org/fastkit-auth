@@ -56,7 +56,7 @@ async def profile(current_user: UserResponse = Depends(get_current_user)) -> JSO
 
 @profile_router.put('/profile', name='auth.profile.update')
 async def update(data:UserUpdate,
-                 current_user: User = Depends(get_current_user),
+                 current_user: UserResponse = Depends(get_current_user),
                  service: UserService = Depends(get_service)
                  ) -> JSONResponse:
     user = await service.update(current_user.id, data.model_dump())
