@@ -5,7 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from fastkit_auth.tokens.models import UserToken
 from fastkit_auth.tokens.schemas import TokenCreate, TokenResponse
 from fastkit_auth.tokens.enums import TokenType
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from uuid import UUID
 from fastkit_core.validation.errors import raise_validation_error
 
@@ -27,7 +27,7 @@ class TokenService(AsyncBaseCrudService[UserToken, TokenCreate, dict, TokenRespo
             user_id=user_id,
             token=UserToken.generate_token(),
             type=token_type,
-            expires_at=datetime.now() + timedelta(minutes=expires_in_minutes)
+            expires_at=datetime.now(timezone.utc) + timedelta(minutes=expires_in_minutes)
         )
         return await self.create(token_data)
 
@@ -51,9 +51,3 @@ class TokenService(AsyncBaseCrudService[UserToken, TokenCreate, dict, TokenRespo
                 raise_validation_error('token', _('tokens.expired'))
 
         return token
-
-    async def consume_token(self, token_string: str, token_type: TokenType) -> bool:
-        token = await self.verify_token(token_string, token_type)
-        await self.repository.delete(token.id)
-
-        return  token is not None
