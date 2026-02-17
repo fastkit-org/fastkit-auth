@@ -4,7 +4,7 @@ from fastkit_core.database import BaseWithTimestamps, IntIdMixin
 from fastkit_auth.tokens.enums import TokenType
 from datetime import datetime, timezone
 from uuid import UUID
-import random
+import secrets
 import string
 
 
@@ -19,7 +19,7 @@ class UserToken(BaseWithTimestamps, IntIdMixin):
     @staticmethod
     def generate_token(length: int = 8) -> str:
         characters = string.ascii_uppercase + string.digits
-        return ''.join(random.choices(characters, k=length))
+        return ''.join(secrets.choice(characters) for _ in range(length))
 
     def is_valid(self) -> bool:
         return self.expires_at > datetime.now(timezone.utc)
