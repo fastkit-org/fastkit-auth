@@ -2,7 +2,7 @@ from typing import Optional
 from pydantic import ConfigDict
 from uuid import UUID
 from fastkit_core.validation import PasswordValidatorMixin, BaseSchema
-from pydantic import EmailStr
+from pydantic import EmailStr, field_serializer
 from datetime import datetime
 
 class UserCreate(BaseSchema, PasswordValidatorMixin):
@@ -10,7 +10,6 @@ class UserCreate(BaseSchema, PasswordValidatorMixin):
     last_name: str
     email: EmailStr
     password: str
-    is_superuser: bool
 
 class UserUpdate(BaseSchema):
     first_name: str
@@ -28,10 +27,12 @@ class UserResponse(BaseSchema):
     is_superuser: bool
     is_verified: bool
 
-    model_config = ConfigDict(
-        from_attributes=True,
-        json_encoders={
-            UUID: str,
-            datetime: lambda v: v.isoformat() if v else None
-        }
-    )
+    model_config = ConfigDict(from_attributes=True)
+
+    @field_serializer('user_id')
+    def serialize_uuid(self, v: UUID) -> str:
+        return str(v)
+
+    @field_serializer('expires_at')
+    def serialize_dt(self, v: datetime) -> str | None:
+        return v.isoformat() if v else None
