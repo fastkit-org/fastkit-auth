@@ -126,3 +126,22 @@ class TestGetCurrentVerifiedUser:
             await get_current_verified_user(mock_user_response)
 
         assert exc_info.value.status_code == 403
+
+# ─── get_current_superuser ────────────────────────────────────────────────────
+
+class TestGetCurrentSuperuser:
+
+    @pytest.mark.asyncio
+    async def test_returns_superuser(self, mock_user_response):
+        mock_user_response.is_superuser = True
+        result = await get_current_superuser(mock_user_response)
+        assert result == mock_user_response
+
+    @pytest.mark.asyncio
+    async def test_raises_403_on_non_superuser(self, mock_user_response):
+        mock_user_response.is_superuser = False
+
+        with pytest.raises(HTTPException) as exc_info:
+            await get_current_superuser(mock_user_response)
+
+        assert exc_info.value.status_code == 403
