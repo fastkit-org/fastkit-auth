@@ -3,12 +3,13 @@ from fastkit_core.http import success_response, error_response
 from fastkit_core.database import get_async_db
 from fastkit_core.i18n import _
 from sqlalchemy.ext.asyncio import AsyncSession
-from fastkit_auth.users.schemas import UserCreate, UserUpdate
+from fastkit_auth.users.schemas import UserCreate, UserUpdate, UserResponse
 from fastkit_auth.users.service import UserService
 from starlette.responses import JSONResponse
 from pydantic import ValidationError
 from fastkit_auth.authentication.dependencies import get_current_user
 from fastkit_auth.users.models import User
+from fastkit_core.validation.errors import format_validation_errors
 
 registration_router = APIRouter(
     tags=['Registration']
@@ -31,10 +32,9 @@ async def registration(user: UserCreate, service: UserService = Depends(get_serv
             status_code=status.HTTP_201_CREATED
         )
     except ValidationError as e:
-        errors = UserCreate.format_errors(e)
         return error_response(
             message=_('validation.failed'),
-            errors=errors,
+            errors=format_validation_errors(e),
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY
         )
 
@@ -44,15 +44,14 @@ async def verify_email(token: str, service: UserService = Depends(get_service)) 
         await service.email_confirmation(token)
         return success_response(message=_('users.email_confirmed'))
     except ValidationError as e:
-        errors = UserCreate.format_errors(e)
         return error_response(
             message=_('validation.failed'),
-            errors=errors,
+            errors=format_validation_errors(e),
             status_code=422
         )
 
 @profile_router.get('/profile', name='auth.profile')
-async def profile(current_user: User = Depends(get_current_user)) -> JSONResponse:
+async def profile(current_user: UserResponse = Depends(get_current_user)) -> JSONResponse:
     return success_response(data=current_user.model_dump(mode='json'))
 
 @profile_router.put('/profile', name='auth.profile.update')

@@ -3,6 +3,7 @@ from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from sqlalchemy.ext.asyncio import AsyncSession
 from fastkit_core.database import get_async_db
 from fastkit_auth.authentication.helpers import JwtHelper
+from fastkit_auth.users.schemas import UserResponse
 from fastkit_auth.users.service import UserService
 from fastkit_auth.users.models import User
 from fastkit_core.i18n import _
@@ -12,7 +13,7 @@ security = HTTPBearer()
 async def get_current_user(
     credentials: HTTPAuthorizationCredentials = Depends(security),
     session: AsyncSession = Depends(get_async_db)
-) -> User:
+) -> UserResponse:
     token = credentials.credentials
 
     try:
