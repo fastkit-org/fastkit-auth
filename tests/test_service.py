@@ -111,3 +111,32 @@ class TestAuthenticate:
 
         MockJWT.create_access_token.assert_called_once_with({"sub": str(mock_user.id)})
         MockJWT.create_refresh_token.assert_called_once_with({"sub": str(mock_user.id)})
+
+# ─── reset_password ───────────────────────────────────────────────────────────
+
+class TestResetPassword:
+
+    @pytest.mark.asyncio
+    async def test_reset_password_success(self, service, mock_user):
+        service.user_service.find_row = AsyncMock(return_value=mock_user)
+        service.user_service.reset_password = AsyncMock()
+
+        await service.reset_password("test@example.com")
+
+        service.user_service.reset_password.assert_called_once_with(mock_user)
+
+    @pytest.mark.asyncio
+    async def test_reset_password_user_not_found(self, service):
+        service.user_service.find_row = AsyncMock(return_value=None)
+
+        with pytest.raises(Exception):
+            await service.reset_password("nonexistent@example.com")
+
+    @pytest.mark.asyncio
+    async def test_reset_password_calls_find_with_email(self, service, mock_user):
+        service.user_service.find_row = AsyncMock(return_value=mock_user)
+        service.user_service.reset_password = AsyncMock()
+
+        await service.reset_password("test@example.com")
+
+        service.user_service.find_row.assert_called_once_with(email="test@example.com")
