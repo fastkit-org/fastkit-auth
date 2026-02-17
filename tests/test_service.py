@@ -140,3 +140,22 @@ class TestResetPassword:
         await service.reset_password("test@example.com")
 
         service.user_service.find_row.assert_called_once_with(email="test@example.com")
+
+# ─── update_password ──────────────────────────────────────────────────────────
+
+class TestUpdatePassword:
+
+    @pytest.mark.asyncio
+    async def test_update_password_success(self, service):
+        service.user_service.update_password = AsyncMock()
+
+        await service.update_password("valid-token", "newpassword123")
+
+        service.user_service.update_password.assert_called_once_with("valid-token", "newpassword123")
+
+    @pytest.mark.asyncio
+    async def test_update_password_propagates_exception(self, service):
+        service.user_service.update_password = AsyncMock(side_effect=Exception("Token invalid"))
+
+        with pytest.raises(Exception, match="Token invalid"):
+            await service.update_password("bad-token", "newpassword")
