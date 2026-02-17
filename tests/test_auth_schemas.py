@@ -46,3 +46,46 @@ class TestResetPasswordRequest:
     def test_missing_email(self):
         with pytest.raises(ValidationError):
             ResetPasswordRequest()
+
+# ─── UpdatePassword ───────────────────────────────────────────────────────────
+
+class TestUpdatePassword:
+
+    def test_valid_update(self):
+        data = UpdatePassword(
+            code="ABC123",
+            password="StrongPass1!",
+            password_confirmation="StrongPass1!"
+        )
+        assert data.code == "ABC123"
+        assert data.password == "StrongPass1!"
+
+    def test_passwords_dont_match(self):
+        with pytest.raises(ValidationError) as exc_info:
+            UpdatePassword(
+                code="ABC123",
+                password="StrongPass1!",
+                password_confirmation="DifferentPass1!"
+            )
+        assert "password" in str(exc_info.value).lower()
+
+    def test_missing_code(self):
+        with pytest.raises(ValidationError):
+            UpdatePassword(
+                password="StrongPass1!",
+                password_confirmation="StrongPass1!"
+            )
+
+    def test_missing_password(self):
+        with pytest.raises(ValidationError):
+            UpdatePassword(
+                code="ABC123",
+                password_confirmation="StrongPass1!"
+            )
+
+    def test_missing_password_confirmation(self):
+        with pytest.raises(ValidationError):
+            UpdatePassword(
+                code="ABC123",
+                password="StrongPass1!"
+            )
