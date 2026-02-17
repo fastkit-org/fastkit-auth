@@ -4,7 +4,7 @@
       "subject": "Welcome",
       "body": "Welcome {name}, <br> Please use this code: {code} for verify your identity, the code will expire in {minutes} minutes"
     },
-    "resset_password": {
+    "reset_password": {
       "subject": "Reset password",
       "body": "Hi {name}, <br> Please use this code: {code} for resetting password, the code will expire in {minutes} minutes"
     }

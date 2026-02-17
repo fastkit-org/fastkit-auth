@@ -15,16 +15,6 @@ from fastkit_core.config import config
 from typing import Sequence, Optional
 from sqlalchemy.orm import Load
 
-mailer = MailBridge(
-    provider=config('app.MAIL_PROVIDER'),
-    host=config('app.MAIL_SERVER'),
-    port=config('app.MAIL_PORT'),
-    username=config('app.MAIL_USERNAME'),
-    password=config('app.MAIL_PASSWORD'),
-    use_tls=config('app.MAIL_SSL_TLS'),
-    from_email=config('app.MAIL_FROM')
-)
-
 class UserService(AsyncBaseCrudService[User, UserCreate, UserUpdate, UserResponse]):
     def __init__(self, session: AsyncSession):
         repository = AsyncRepository(User, session)
@@ -65,7 +55,7 @@ class UserService(AsyncBaseCrudService[User, UserCreate, UserUpdate, UserRespons
             expires_in_minutes=10
         )
 
-        mailer.send(
+        self._get_mailer().send(
             to=instance.email,
             subject=_('emails.confirm_email.subject'),
             body=_('emails.confirm_email.body',
@@ -88,6 +78,17 @@ class UserService(AsyncBaseCrudService[User, UserCreate, UserUpdate, UserRespons
         }, commit=True)
         await self.token_service.delete(id=token.id)
 
+    def _get_mailer(self) -> MailBridge:
+        return  MailBridge(
+                provider=config('app.MAIL_PROVIDER'),
+                host=config('app.MAIL_SERVER'),
+                port=config('app.MAIL_PORT'),
+                username=config('app.MAIL_USERNAME'),
+                password=config('app.MAIL_PASSWORD'),
+                use_tls=config('app.MAIL_SSL_TLS'),
+                from_email=config('app.MAIL_FROM')
+        )
+
     async def reset_password(self, user: User) -> None:
         token = await self.token_service.create_token(
             user_id=user.id,
@@ -95,10 +96,10 @@ class UserService(AsyncBaseCrudService[User, UserCreate, UserUpdate, UserRespons
             expires_in_minutes=10
         )
 
-        mailer.send(
+        self._get_mailer().send(
             to=user.email,
-            subject=_('emails.resset_password.subject'),
-            body=_('emails.resset_password.body',
+            subject=_('emails.reset_password.subject'),
+            body=_('emails.reset_password.body',
                    None,
                    name=user.first_name,
                    code=token.token,
