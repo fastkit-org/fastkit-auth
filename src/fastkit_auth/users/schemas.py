@@ -15,7 +15,6 @@ class UserUpdate(BaseSchema):
     first_name: str
     last_name: str
     email: EmailStr
-    is_superuser: bool
 
 class UserResponse(BaseSchema):
     id: UUID
