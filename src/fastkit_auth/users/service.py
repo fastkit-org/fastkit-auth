@@ -79,7 +79,8 @@ class UserService(AsyncBaseCrudService[User, UserCreate, UserUpdate, UserRespons
         await self.token_service.delete(id=token.id)
 
     def _get_mailer(self) -> MailBridge:
-        return  MailBridge(
+        if not hasattr(self, '_mailer'):
+            self._mailer = MailBridge(
                 provider=config('app.MAIL_PROVIDER'),
                 host=config('app.MAIL_SERVER'),
                 port=config('app.MAIL_PORT'),
@@ -87,7 +88,9 @@ class UserService(AsyncBaseCrudService[User, UserCreate, UserUpdate, UserRespons
                 password=config('app.MAIL_PASSWORD'),
                 use_tls=config('app.MAIL_SSL_TLS'),
                 from_email=config('app.MAIL_FROM')
-        )
+            )
+
+        return self._mailer
 
     async def reset_password(self, user: User) -> None:
         token = await self.token_service.create_token(
