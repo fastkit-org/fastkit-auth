@@ -29,10 +29,10 @@ class UserResponse(BaseSchema):
 
     model_config = ConfigDict(from_attributes=True)
 
-    @field_serializer('user_id')
+    @field_serializer('id')
     def serialize_uuid(self, v: UUID) -> str:
         return str(v)
 
-    @field_serializer('expires_at')
+    @field_serializer('email_verified_at')
     def serialize_dt(self, v: datetime) -> str | None:
         return v.isoformat() if v else None
