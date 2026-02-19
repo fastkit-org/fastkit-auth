@@ -270,3 +270,66 @@ class TestResetPassword:
 
         call_args = service.token_service.create_token.call_args
         assert call_args[1]['token_type'] == TokenType.PASSWORD_RESET
+
+class TestUpdatePassword:
+
+    @pytest.mark.asyncio
+    async def test_verifies_reset_token(self, service, mock_token):
+        service.token_service.verify_token = AsyncMock(return_value=mock_token)
+        service.repository.update = AsyncMock()
+        service.token_service.delete = AsyncMock()
+
+        with patch('fastkit_auth.users.service.PasswordHelper') as MockPH:
+            MockPH.hash.return_value = "new_hashed"
+            await service.update_password("RESET123", "newpassword")
+
+        service.token_service.verify_token.assert_called_once_with(
+            token_string="RESET123",
+            token_type=TokenType.PASSWORD_RESET
+        )
+
+    @pytest.mark.asyncio
+    async def test_hashes_new_password(self, service, mock_token):
+        service.token_service.verify_token = AsyncMock(return_value=mock_token)
+        service.repository.update = AsyncMock()
+        service.token_service.delete = AsyncMock()
+
+        with patch('fastkit_auth.users.service.PasswordHelper') as MockPH:
+            MockPH.hash.return_value = "new_hashed_pw"
+            await service.update_password("RESET123", "newpassword")
+
+        MockPH.hash.assert_called_once_with("newpassword")
+        call_kwargs = service.repository.update.call_args[1]
+        assert call_kwargs['data']['hashed_password'] == "new_hashed_pw"
+
+    @pytest.mark.asyncio
+    async def test_deletes_token_after_update(self, service, mock_token):
+        service.token_service.verify_token = AsyncMock(return_value=mock_token)
+        service.repository.update = AsyncMock()
+        service.token_service.delete = AsyncMock()
+
+        with patch('fastkit_auth.users.service.PasswordHelper') as MockPH:
+            MockPH.hash.return_value = "hashed"
+            await service.update_password("RESET123", "newpassword")
+
+        service.token_service.delete.assert_called_once_with(id=mock_token.id)
+
+    @pytest.mark.asyncio
+    async def test_commits_password_update(self, service, mock_token):
+        service.token_service.verify_token = AsyncMock(return_value=mock_token)
+        service.repository.update = AsyncMock()
+        service.token_service.delete = AsyncMock()
+
+        with patch('fastkit_auth.users.service.PasswordHelper') as MockPH:
+            MockPH.hash.return_value = "hashed"
+            await service.update_password("RESET123", "newpassword")
+
+        call_kwargs = service.repository.update.call_args[1]
+        assert call_kwargs['commit'] is True
+
+    @pytest.mark.asyncio
+    async def test_invalid_token_raises(self, service):
+        service.token_service.verify_token = AsyncMock(side_effect=Exception("Invalid"))
+
+        with pytest.raises(Exception):
+            await service.update_password("BAD_TOKEN", "newpassword")
