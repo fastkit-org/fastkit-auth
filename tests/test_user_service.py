@@ -86,3 +86,24 @@ class TestFindRow:
             _limit=1, _load_relations=None, email="test@example.com", is_active=True
         )
 
+class TestValidateCreate:
+
+    @pytest.mark.asyncio
+    async def test_raises_when_email_exists(self, service):
+        service.exists = AsyncMock(return_value=True)
+
+        with pytest.raises(ValidationError) as exc_info:
+            await service.validate_create({"email": "existing@example.com"})
+
+        errors = exc_info.value.errors()
+        assert any(e['loc'] == ('email',) for e in errors)
+
+    @pytest.mark.asyncio
+    async def test_passes_when_email_unique(self, service):
+        service.exists = AsyncMock(return_value=False)
+
+        # Should not raise
+        await service.validate_create({"email": "new@example.com"})
+
+        service.exists.assert_called_once_with(email="new@example.com")
+
