@@ -52,3 +52,39 @@ class TestUserCreate:
             password="StrongPass1!"
         )
         assert not hasattr(data, 'is_superuser') or 'is_superuser' not in data.model_fields
+
+
+class TestUserUpdate:
+
+    def test_valid_update(self):
+        data = UserUpdate(
+            first_name="Jane",
+            last_name="Smith",
+            email="jane@example.com"
+        )
+        assert data.first_name == "Jane"
+        assert data.email == "jane@example.com"
+
+    def test_missing_first_name(self):
+        with pytest.raises(ValidationError):
+            UserUpdate(last_name="Smith", email="jane@example.com")
+
+    def test_missing_last_name(self):
+        with pytest.raises(ValidationError):
+            UserUpdate(first_name="Jane", email="jane@example.com")
+
+    def test_missing_email(self):
+        with pytest.raises(ValidationError):
+            UserUpdate(first_name="Jane", last_name="Smith")
+
+    def test_invalid_email_format(self):
+        with pytest.raises(ValidationError):
+            UserUpdate(first_name="Jane", last_name="Smith", email="invalid")
+
+    def test_no_is_superuser_field(self):
+        """is_superuser should not be updatable by user"""
+        assert 'is_superuser' not in UserUpdate.model_fields
+
+    def test_no_password_field(self):
+        """Password should not be changeable through profile update"""
+        assert 'password' not in UserUpdate.model_fields
