@@ -105,3 +105,27 @@ class TestCreateToken:
 
         assert result == mock_created
 
+class TestInvalidateUserTokens:
+
+    @pytest.mark.asyncio
+    async def test_calls_delete_many_with_correct_filters(self, service, user_id):
+        service.repository.delete_many = AsyncMock()
+
+        await service.invalidate_user_tokens(user_id, TokenType.PASSWORD_RESET)
+
+        service.repository.delete_many.assert_called_once_with({
+            "user_id": user_id,
+            "type": TokenType.PASSWORD_RESET,
+        })
+
+    @pytest.mark.asyncio
+    async def test_invalidate_email_verification_tokens(self, service, user_id):
+        service.repository.delete_many = AsyncMock()
+
+        await service.invalidate_user_tokens(user_id, TokenType.EMAIL_VERIFICATION)
+
+        service.repository.delete_many.assert_called_once_with({
+            "user_id": user_id,
+            "type": TokenType.EMAIL_VERIFICATION,
+        })
+
