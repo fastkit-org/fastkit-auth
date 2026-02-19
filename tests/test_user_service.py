@@ -232,3 +232,41 @@ class TestEmailConfirmation:
             await service.email_confirmation("INVALID1")
 
 
+class TestResetPassword:
+
+    @pytest.mark.asyncio
+    async def test_creates_password_reset_token(self, service, mock_user, mock_token):
+        service.token_service.create_token = AsyncMock(return_value=mock_token)
+        mock_mailer = MagicMock()
+        service._get_mailer = MagicMock(return_value=mock_mailer)
+
+        await service.reset_password(mock_user)
+
+        service.token_service.create_token.assert_called_once_with(
+            user_id=mock_user.id,
+            token_type=TokenType.PASSWORD_RESET,
+            expires_in_minutes=10
+        )
+
+    @pytest.mark.asyncio
+    async def test_sends_reset_email(self, service, mock_user, mock_token):
+        service.token_service.create_token = AsyncMock(return_value=mock_token)
+        mock_mailer = MagicMock()
+        service._get_mailer = MagicMock(return_value=mock_mailer)
+
+        await service.reset_password(mock_user)
+
+        mock_mailer.send.assert_called_once()
+        call_kwargs = mock_mailer.send.call_args[1]
+        assert call_kwargs['to'] == mock_user.email
+
+    @pytest.mark.asyncio
+    async def test_uses_correct_token_type(self, service, mock_user, mock_token):
+        service.token_service.create_token = AsyncMock(return_value=mock_token)
+        mock_mailer = MagicMock()
+        service._get_mailer = MagicMock(return_value=mock_mailer)
+
+        await service.reset_password(mock_user)
+
+        call_args = service.token_service.create_token.call_args
+        assert call_args[1]['token_type'] == TokenType.PASSWORD_RESET
