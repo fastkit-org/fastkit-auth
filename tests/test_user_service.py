@@ -107,3 +107,37 @@ class TestValidateCreate:
 
         service.exists.assert_called_once_with(email="new@example.com")
 
+class TestBeforeCreate:
+
+    @pytest.mark.asyncio
+    async def test_hashes_password(self, service):
+        with patch('fastkit_auth.users.service.PasswordHelper') as MockPH:
+            MockPH.hash.return_value = "hashed_password_123"
+
+            result = await service.before_create({"password": "plaintext", "email": "test@example.com"})
+
+        assert result["hashed_password"] == "hashed_password_123"
+        assert "password" not in result
+        MockPH.hash.assert_called_once_with("plaintext")
+
+    @pytest.mark.asyncio
+    async def test_removes_plain_password(self, service):
+        with patch('fastkit_auth.users.service.PasswordHelper') as MockPH:
+            MockPH.hash.return_value = "hashed"
+
+            result = await service.before_create({"password": "secret", "name": "John"})
+
+        assert "password" not in result
+        assert "name" in result
+
+    @pytest.mark.asyncio
+    async def test_preserves_other_fields(self, service):
+        with patch('fastkit_auth.users.service.PasswordHelper') as MockPH:
+            MockPH.hash.return_value = "hashed"
+
+            data = {"password": "secret", "first_name": "John", "last_name": "Doe", "email": "j@d.com"}
+            result = await service.before_create(data)
+
+        assert result["first_name"] == "John"
+        assert result["last_name"] == "Doe"
+        assert result["email"] == "j@d.com"
