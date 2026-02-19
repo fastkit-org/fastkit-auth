@@ -333,3 +333,29 @@ class TestUpdatePassword:
 
         with pytest.raises(Exception):
             await service.update_password("BAD_TOKEN", "newpassword")
+
+class TestGetMailer:
+
+    def test_creates_mailer_instance(self, service):
+        with patch('fastkit_auth.users.service.config') as mock_config, \
+             patch('fastkit_auth.users.service.MailBridge') as MockMailBridge:
+            mock_config.return_value = "test_value"
+            MockMailBridge.return_value = MagicMock()
+
+            mailer = service._get_mailer()
+
+            assert mailer is not None
+            MockMailBridge.assert_called_once()
+
+    def test_caches_mailer_instance(self, service):
+        with patch('fastkit_auth.users.service.config') as mock_config, \
+             patch('fastkit_auth.users.service.MailBridge') as MockMailBridge:
+            mock_config.return_value = "test_value"
+            mock_instance = MagicMock()
+            MockMailBridge.return_value = mock_instance
+
+            mailer1 = service._get_mailer()
+            mailer2 = service._get_mailer()
+
+            assert mailer1 is mailer2
+            MockMailBridge.assert_called_once()
