@@ -41,3 +41,27 @@ class TestGenerateToken:
     def test_length_one(self):
         token = UserToken.generate_token(length=1)
         assert len(token) == 1
+
+class TestIsValid:
+
+    def _make_token(self, expires_at: datetime) -> UserToken:
+        token = MagicMock(spec=UserToken)
+        token.expires_at = expires_at
+        token.is_valid = UserToken.is_valid.__get__(token)
+        return token
+
+    def test_valid_token_future_expiry(self):
+        token = self._make_token(datetime.now(timezone.utc) + timedelta(minutes=10))
+        assert token.is_valid() is True
+
+    def test_expired_token(self):
+        token = self._make_token(datetime.now(timezone.utc) - timedelta(minutes=1))
+        assert token.is_valid() is False
+
+    def test_just_expired_token(self):
+        token = self._make_token(datetime.now(timezone.utc) - timedelta(seconds=1))
+        assert token.is_valid() is False
+
+    def test_far_future_expiry(self):
+        token = self._make_token(datetime.now(timezone.utc) + timedelta(days=365))
+        assert token.is_valid() is True
