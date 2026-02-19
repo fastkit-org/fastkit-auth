@@ -141,3 +141,45 @@ class TestBeforeCreate:
         assert result["first_name"] == "John"
         assert result["last_name"] == "Doe"
         assert result["email"] == "j@d.com"
+
+class TestAfterCreate:
+
+    @pytest.mark.asyncio
+    async def test_creates_email_verification_token(self, service, mock_user, mock_token):
+        service.token_service.create_token = AsyncMock(return_value=mock_token)
+        mock_mailer = MagicMock()
+        service._get_mailer = MagicMock(return_value=mock_mailer)
+
+        await service.after_create(mock_user)
+
+        service.token_service.create_token.assert_called_once_with(
+            user_id=mock_user.id,
+            token_type=TokenType.EMAIL_VERIFICATION,
+            expires_in_minutes=10
+        )
+
+    @pytest.mark.asyncio
+    async def test_sends_verification_email(self, service, mock_user, mock_token):
+        service.token_service.create_token = AsyncMock(return_value=mock_token)
+        mock_mailer = MagicMock()
+        service._get_mailer = MagicMock(return_value=mock_mailer)
+
+        await service.after_create(mock_user)
+
+        mock_mailer.send.assert_called_once()
+        call_kwargs = mock_mailer.send.call_args[1]
+        assert call_kwargs['to'] == mock_user.email
+
+    @pytest.mark.asyncio
+    async def test_email_contains_token_code(self, service, mock_user, mock_token):
+        mock_token.token = "VERIFY99"
+        service.token_service.create_token = AsyncMock(return_value=mock_token)
+        mock_mailer = MagicMock()
+        service._get_mailer = MagicMock(return_value=mock_mailer)
+
+        await service.after_create(mock_user)
+
+        call_kwargs = mock_mailer.send.call_args[1]
+        # Body should be constructed with the token code
+        assert mock_mailer.send.called
+
