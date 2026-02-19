@@ -69,3 +69,56 @@ class TestTokenCreate:
             expires_at=datetime.now(timezone.utc)
         )
         assert data.type == TokenType.PASSWORD_RESET
+
+class TestTokenResponse:
+
+    def test_valid_token_response(self):
+        uid = uuid4()
+        now = datetime.now(timezone.utc)
+        data = TokenResponse(
+            id=1,
+            user_id=uid,
+            type=TokenType.EMAIL_VERIFICATION,
+            token="ABC12345",
+            expires_at=now
+        )
+        assert data.id == 1
+        assert data.token == "ABC12345"
+
+    def test_serializes_uuid_to_string(self):
+        uid = uuid4()
+        data = TokenResponse(
+            id=1,
+            user_id=uid,
+            type=TokenType.EMAIL_VERIFICATION,
+            token="ABC12345",
+            expires_at=datetime.now(timezone.utc)
+        )
+        dumped = data.model_dump(mode='json')
+        assert isinstance(dumped['user_id'], str)
+        assert dumped['user_id'] == str(uid)
+
+    def test_serializes_datetime_to_iso(self):
+        now = datetime.now(timezone.utc)
+        data = TokenResponse(
+            id=1,
+            user_id=uuid4(),
+            type=TokenType.EMAIL_VERIFICATION,
+            token="ABC12345",
+            expires_at=now
+        )
+        dumped = data.model_dump(mode='json')
+        assert isinstance(dumped['expires_at'], str)
+        assert dumped['expires_at'] == now.isoformat()
+
+    def test_from_attributes_config(self):
+        assert TokenResponse.model_config.get('from_attributes') is True
+
+    def test_missing_id(self):
+        with pytest.raises(ValidationError):
+            TokenResponse(
+                user_id=uuid4(),
+                type=TokenType.EMAIL_VERIFICATION,
+                token="ABC12345",
+                expires_at=datetime.now(timezone.utc)
+            )
