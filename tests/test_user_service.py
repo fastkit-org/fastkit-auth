@@ -44,3 +44,45 @@ def mock_token():
     token.token = "ABC12345"
     return token
 
+class TestFindRow:
+
+    @pytest.mark.asyncio
+    async def test_returns_user_when_found(self, service, mock_user):
+        service.repository.filter = AsyncMock(return_value=[mock_user])
+
+        result = await service.find_row(email="test@example.com")
+
+        assert result == mock_user
+        service.repository.filter.assert_called_once_with(
+            _limit=1, _load_relations=None, email="test@example.com"
+        )
+
+    @pytest.mark.asyncio
+    async def test_returns_none_when_not_found(self, service):
+        service.repository.filter = AsyncMock(return_value=[])
+
+        result = await service.find_row(email="nonexistent@example.com")
+
+        assert result is None
+
+    @pytest.mark.asyncio
+    async def test_passes_load_relations(self, service):
+        service.repository.filter = AsyncMock(return_value=[])
+        mock_relations = [MagicMock()]
+
+        await service.find_row(load_relations=mock_relations, email="test@example.com")
+
+        service.repository.filter.assert_called_once_with(
+            _limit=1, _load_relations=mock_relations, email="test@example.com"
+        )
+
+    @pytest.mark.asyncio
+    async def test_passes_multiple_filters(self, service, mock_user):
+        service.repository.filter = AsyncMock(return_value=[mock_user])
+
+        await service.find_row(email="test@example.com", is_active=True)
+
+        service.repository.filter.assert_called_once_with(
+            _limit=1, _load_relations=None, email="test@example.com", is_active=True
+        )
+
