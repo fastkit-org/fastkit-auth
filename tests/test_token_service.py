@@ -129,3 +129,50 @@ class TestInvalidateUserTokens:
             "type": TokenType.EMAIL_VERIFICATION,
         })
 
+class TestVerifyToken:
+
+    @pytest.mark.asyncio
+    async def test_verify_valid_token(self, service, mock_valid_token):
+        service.repository.first = AsyncMock(return_value=mock_valid_token)
+
+        result = await service.verify_token("ABC12345", TokenType.EMAIL_VERIFICATION)
+
+        assert result == mock_valid_token
+        service.repository.first.assert_called_once_with(
+            token="ABC12345", type=TokenType.EMAIL_VERIFICATION
+        )
+
+    @pytest.mark.asyncio
+    async def test_verify_token_not_found_raises(self, service):
+        service.repository.first = AsyncMock(return_value=None)
+
+        with pytest.raises(Exception):
+            await service.verify_token("NOTFOUND", TokenType.EMAIL_VERIFICATION)
+
+    @pytest.mark.asyncio
+    async def test_verify_expired_token_raises_and_deletes(self, service, mock_expired_token):
+        service.repository.first = AsyncMock(return_value=mock_expired_token)
+        service.repository.delete = AsyncMock()
+
+        with pytest.raises(Exception):
+            await service.verify_token("EXPIRED1", TokenType.EMAIL_VERIFICATION)
+
+        service.repository.delete.assert_called_once_with(mock_expired_token.id)
+
+    @pytest.mark.asyncio
+    async def test_verify_token_checks_correct_type(self, service, mock_valid_token):
+        service.repository.first = AsyncMock(return_value=mock_valid_token)
+
+        await service.verify_token("ABC12345", TokenType.EMAIL_VERIFICATION)
+
+        service.repository.first.assert_called_once_with(
+            token="ABC12345", type=TokenType.EMAIL_VERIFICATION
+        )
+
+    @pytest.mark.asyncio
+    async def test_verify_token_wrong_type_not_found(self, service):
+        service.repository.first = AsyncMock(return_value=None)
+
+        with pytest.raises(Exception):
+            await service.verify_token("ABC12345", TokenType.PASSWORD_RESET)
+
