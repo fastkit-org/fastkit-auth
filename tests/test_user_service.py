@@ -183,3 +183,52 @@ class TestAfterCreate:
         # Body should be constructed with the token code
         assert mock_mailer.send.called
 
+class TestEmailConfirmation:
+
+    @pytest.mark.asyncio
+    async def test_verifies_token(self, service, mock_token):
+        service.token_service.verify_token = AsyncMock(return_value=mock_token)
+        service.repository.update = AsyncMock()
+        service.token_service.delete = AsyncMock()
+
+        await service.email_confirmation("ABC12345")
+
+        service.token_service.verify_token.assert_called_once_with(
+            token_string="ABC12345",
+            token_type=TokenType.EMAIL_VERIFICATION
+        )
+
+    @pytest.mark.asyncio
+    async def test_updates_user_fields(self, service, mock_token):
+        service.token_service.verify_token = AsyncMock(return_value=mock_token)
+        service.repository.update = AsyncMock()
+        service.token_service.delete = AsyncMock()
+
+        await service.email_confirmation("ABC12345")
+
+        service.repository.update.assert_called_once()
+        call_kwargs = service.repository.update.call_args[1]
+        assert call_kwargs['id'] == mock_token.user_id
+        assert call_kwargs['data']['is_active'] is True
+        assert call_kwargs['data']['is_verified'] is True
+        assert 'email_verified_at' in call_kwargs['data']
+        assert call_kwargs['commit'] is True
+
+    @pytest.mark.asyncio
+    async def test_deletes_token_after_confirmation(self, service, mock_token):
+        service.token_service.verify_token = AsyncMock(return_value=mock_token)
+        service.repository.update = AsyncMock()
+        service.token_service.delete = AsyncMock()
+
+        await service.email_confirmation("ABC12345")
+
+        service.token_service.delete.assert_called_once_with(id=mock_token.id)
+
+    @pytest.mark.asyncio
+    async def test_invalid_token_raises(self, service):
+        service.token_service.verify_token = AsyncMock(side_effect=Exception("Invalid token"))
+
+        with pytest.raises(Exception):
+            await service.email_confirmation("INVALID1")
+
+
