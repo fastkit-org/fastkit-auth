@@ -176,3 +176,14 @@ class TestVerifyToken:
         with pytest.raises(Exception):
             await service.verify_token("ABC12345", TokenType.PASSWORD_RESET)
 
+class TestTokenType:
+
+    def test_email_verification_value(self):
+        assert TokenType.EMAIL_VERIFICATION.value == "email_verification"
+
+    def test_password_reset_value(self):
+        assert TokenType.PASSWORD_RESET.value == "password_reset"
+
+    def test_enum_is_string(self):
+        assert isinstance(TokenType.EMAIL_VERIFICATION, str)
+        assert isinstance(TokenType.PASSWORD_RESET, str)
