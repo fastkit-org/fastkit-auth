@@ -9,6 +9,10 @@ from fastkit_auth.authentication.dependencies import (
     get_current_superuser,
 )
 
+@pytest.fixture(autouse=True)
+def mock_i18n():
+    with patch('fastkit_auth.authentication.dependencies._', side_effect=lambda key, *a, **kw: key):
+        yield
 
 @pytest.fixture
 def mock_credentials():

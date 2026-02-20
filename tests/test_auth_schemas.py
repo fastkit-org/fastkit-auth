@@ -1,8 +1,13 @@
 import pytest
 from pydantic import ValidationError
+from unittest.mock import patch
 
 from fastkit_auth.authentication.schemas import LoginRequest, ResetPasswordRequest, UpdatePassword
 
+@pytest.fixture(autouse=True)
+def mock_i18n():
+    with patch('fastkit_auth.authentication.schemas._', side_effect=lambda key, *a, **kw: key):
+        yield
 
 # ─── LoginRequest ─────────────────────────────────────────────────────────────
 

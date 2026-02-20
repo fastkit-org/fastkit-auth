@@ -5,6 +5,10 @@ import jwt
 
 from fastkit_auth.authentication.helpers import PasswordHelper, JwtHelper
 
+@pytest.fixture(autouse=True)
+def mock_i18n():
+    with patch('fastkit_auth.authentication.helpers._', side_effect=lambda key, *a, **kw: key):
+        yield
 
 # ─── PasswordHelper Tests ────────────────────────────────────────────────────
 

@@ -1,12 +1,15 @@
 import pytest
-from unittest.mock import AsyncMock, MagicMock, patch, PropertyMock
+from unittest.mock import AsyncMock, MagicMock, patch
 from uuid import uuid4
-from datetime import datetime, timezone
 from pydantic import ValidationError
 
 from fastkit_auth.users.service import UserService
 from fastkit_auth.tokens.enums import TokenType
 
+@pytest.fixture(autouse=True)
+def mock_i18n():
+    with patch('fastkit_auth.users.service._', side_effect=lambda key, *a, **kw: key):
+        yield
 
 @pytest.fixture
 def mock_session():
