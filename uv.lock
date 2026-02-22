@@ -294,19 +294,19 @@ name = "fastkit-auth"
 version = "0.1.0"
 source = { editable = "." }
 dependencies = [
+    { name = "alembic" },
+    { name = "asyncpg" },
     { name = "fastkit-core" },
     { name = "mailbridge" },
     { name = "passlib" },
+    { name = "psycopg2-binary" },
     { name = "pydantic", extra = ["email"] },
     { name = "pyjwt" },
 ]
 
 [package.dev-dependencies]
 dev = [
-    { name = "alembic" },
-    { name = "asyncpg" },
     { name = "httpx" },
-    { name = "psycopg2-binary" },
     { name = "pytest" },
     { name = "pytest-asyncio" },
     { name = "pytest-cov" },
@@ -314,19 +314,19 @@ dev = [
 
 [package.metadata]
 requires-dist = [
+    { name = "alembic" },
+    { name = "asyncpg", specifier = ">=0.31.0" },
     { name = "fastkit-core", specifier = ">=0.3.5" },
     { name = "mailbridge", specifier = ">=2.0.0" },
     { name = "passlib", specifier = ">=1.7.4" },
+    { name = "psycopg2-binary", specifier = ">=2.9.11" },
     { name = "pydantic", extras = ["email"], specifier = ">=2.12.5" },
     { name = "pyjwt", specifier = ">=2.11.0" },
 ]
 
 [package.metadata.requires-dev]
 dev = [
-    { name = "alembic" },
-    { name = "asyncpg", specifier = ">=0.31.0" },
     { name = "httpx", specifier = ">=0.28.1" },
-    { name = "psycopg2-binary", specifier = ">=2.9.11" },
     { name = "pytest", specifier = ">=9.0.2" },
     { name = "pytest-asyncio", specifier = ">=1.3.0" },
     { name = "pytest-cov", specifier = ">=7.0.0" },
