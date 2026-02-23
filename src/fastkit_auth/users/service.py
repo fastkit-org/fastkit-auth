@@ -82,11 +82,8 @@ class UserService(AsyncBaseCrudService[User, UserCreate, UserUpdate, UserRespons
         if not hasattr(self, '_mailer'):
             self._mailer = MailBridge(
                 provider=config('app.MAIL_PROVIDER'),
-                host=config('app.MAIL_SERVER'),
-                port=config('app.MAIL_PORT'),
-                username=config('app.MAIL_USERNAME'),
-                password=config('app.MAIL_PASSWORD'),
-                use_tls=config('app.MAIL_SSL_TLS'),
+                api_key=config('app.MAIL_API_KEY'),
+                endpoint=config('app.MAIL_ENDPOINT'),
                 from_email=config('app.MAIL_FROM')
             )
 
