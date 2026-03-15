@@ -8,7 +8,6 @@ from fastkit_auth.users.service import UserService
 from starlette.responses import JSONResponse
 from pydantic import ValidationError
 from fastkit_auth.authentication.dependencies import get_current_user
-from fastkit_auth.users.models import User
 from fastkit_core.validation.errors import format_validation_errors
 
 registration_router = APIRouter(
@@ -34,7 +33,7 @@ async def registration(user: UserCreate, service: UserService = Depends(get_serv
     except ValidationError as e:
         return error_response(
             message=_('validation.failed'),
-            errors=format_validation_errors(e),
+            errors=format_validation_errors(e.errors()),
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY
         )
 
@@ -46,7 +45,7 @@ async def verify_email(token: str, service: UserService = Depends(get_service)) 
     except ValidationError as e:
         return error_response(
             message=_('validation.failed'),
-            errors=format_validation_errors(e),
+            errors=format_validation_errors(e.errors()),
             status_code=422
         )
 
