@@ -1,16 +1,16 @@
 [project]
 name = "fastkit-auth"
 version = "0.1.0"
-description = "Lightweight package for atuhentication, registration and edit profile"
+description = "JWT authentication, registration and user management for FastKit/FastAPI applications"
 readme = "README.md"
 authors = [
-    { name = "Codevelo", email = "info@codevelo.io" }
+    {name = "FastKit Org", email = "hello@fastkit.org"}
 ]
 
-requires-python = ">=3.12"
+requires-python = ">=3.12,<3.14"
 dependencies = [
-    "fastkit-core>=0.3.5",
-    "mailbridge>=2.0.0",
+    "fastkit-core>=0.4.0,<0.5.0",
+    "mailbridge>=2.0.0,<3.0.0",
     "passlib>=1.7.4",
     "pydantic[email]>=2.12.5",
     "pyjwt>=2.11.0",
