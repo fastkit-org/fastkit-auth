@@ -1,6 +1,6 @@
 [project]
 name = "fastkit-auth"
-version = "0.1.0"
+version = "0.1.1"
 description = "JWT authentication, registration and user management for FastKit/FastAPI applications"
 readme = "README.md"
 authors = [
